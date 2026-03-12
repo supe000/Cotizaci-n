@@ -1,303 +1,377 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Cotización</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chino 99 Pro</title>
     <style>
         body {
-            font-family: Arial;
-            background: #f4f4f4;
+            font-family: -apple-system, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .app-container {
+            max-width: 850px;
+            margin: auto;
+            background: #fff;
             padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #00796b;
             text-align: center;
+            margin: 10px 0;
         }
 
         .inputs {
             display: flex;
             flex-wrap: wrap;
+            gap: 8px;
             justify-content: center;
+            margin-bottom: 15px;
         }
 
         input {
-            padding: 10px;
-            margin: 5px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
             width: 140px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #4db6ac;
+            box-shadow: 0 0 5px rgba(77, 182, 172, 0.3);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            margin: 10px 0;
+            justify-content: center;
         }
 
         button {
-            padding: 8px 12px;
-            margin: 4px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 5px;
-            background: #8ddad3;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #fff;
             cursor: pointer;
+        }
+
+        .b-add {
+            background: #4db6ac;
+        }
+
+        .b-print {
+            background: #455a64;
+        }
+
+        .b-clear {
+            background: #ef5350;
         }
 
         table {
             width: 100%;
-            margin-top: 15px;
             border-collapse: collapse;
-            background: white;
+            margin-top: 15px;
+            font-size: 14px;
+            table-layout: fixed;
         }
 
         th {
-            background: #8ddad3;
-            padding: 8px;
+            background: #a7ffeb;
+            padding: 10px;
+            border: 1px solid #ddd;
+            color: #000;
         }
 
         td {
+            padding: 10px;
             border: 1px solid #ddd;
-            padding: 6px;
+            text-align: center;
+            word-break: break-all;
         }
 
-        .total {
-            margin-top: 15px;
-            font-size: 18px;
+        .editable {
+            background: #fffde7;
+            border: 1px dashed #ffd54f !important;
+            outline: none;
             font-weight: bold;
         }
-    </style>
 
+        .row-subtotal {
+            font-weight: bold;
+            color: #00796b;
+        }
+
+        .btn-del {
+            color: #d32f2f;
+            background: none;
+            border: 1px solid #d32f2f;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .total-banner {
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #d32f2f;
+            padding: 10px;
+            border-top: 2px solid #eee;
+        }
+
+        @media print {
+            @page {
+                margin: 0;
+            }
+
+            body>*:not(#print-receipt) {
+                display: none !important;
+            }
+
+            #print-receipt {
+                display: block !important;
+                width: 72mm;
+                margin: 0;
+                padding: 5mm;
+                background: #fff;
+                font-family: 'Courier New', monospace;
+            }
+
+            .p-header {
+                text-align: center;
+                margin-bottom: 3mm;
+            }
+
+            .p-name {
+                font-size: 18pt;
+                font-weight: bold;
+            }
+
+            .p-row {
+                width: 100%;
+                white-space: nowrap !important;
+                border-bottom: 1px dashed #000;
+                padding: 1.2mm 0;
+                display: block;
+                clear: both;
+                overflow: hidden;
+            }
+
+            .p-col {
+                display: inline-block !important;
+                font-size: 9pt;
+                vertical-align: top;
+            }
+
+            .c-cod {
+                width: 20%;
+            }
+
+            .c-art {
+                width: 42%;
+            }
+
+            .c-can {
+                width: 12%;
+                text-align: center;
+            }
+
+            .c-val {
+                width: 26%;
+                text-align: right;
+            }
+
+            .p-total {
+                text-align: right;
+                font-size: 14pt;
+                font-weight: bold;
+                margin-top: 4mm;
+            }
+
+            .p-footer {
+                text-align: center;
+                font-size: 10pt;
+                margin-top: 6mm;
+            }
+        }
+
+        #print-receipt {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h2>Cotización</h2>
+    <div class="app-container">
+        <h2>✨ Chino 99</h2>
 
-    <div class="inputs">
+        <div class="inputs">
+            <input id="inCod" placeholder="Código">
+            <input id="inArt" placeholder="Producto">
+            <input id="inCan" type="number" placeholder="Cantidad">
+            <input id="inPre" type="number" placeholder="Unidad ($)">
+        </div>
 
-        <input id="codigo" placeholder="Código">
-        <input id="producto" placeholder="Producto">
-        <input id="cantidad" type="number" placeholder="Cantidad">
-        <input id="precio" placeholder="Precio">
+        <div class="btn-row">
+            <button class="b-add" onclick="addItem()">Agregar</button>
+            <button class="b-print" onclick="window.print()">Imprimir</button>
+            <button class="b-clear" onclick="clearList()">Limpiar</button>
+        </div>
 
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:15%">Código</th>
+                        <th style="width:30%">Producto</th>
+                        <th style="width:12%">Cantidad</th>
+                        <th style="width:12%">Unidad</th>
+                        <th style="width:16%">Valor</th>
+                        <th style="width:15%">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="mainList"></tbody>
+            </table>
+        </div>
+        <div class="total-banner" id="totalShow">Total: $0.00</div>
     </div>
 
-    <div>
-
-        <button onclick="agregar()">Agregar</button>
-        <button onclick="window.print()">Imprimir</button>
-        <button onclick="limpiar()">Limpiar</button>
-
-    </div>
-
-    <table>
-
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Precio</th>
-                <th>Valor</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-
-        <tbody id="tabla"></tbody>
-
-    </table>
-
-    <div class="total" id="totalGeneral">
-        Total general: 0
+    <div id="print-receipt">
+        <div class="p-header">
+            <div class="p-name">CHINO99</div>
+            <div style="font-size:10pt;">
+                RUT: 76781806-8 | Sazie 2765<br>
+                WhatsApp: +56 9 9098 7447<br>
+                Fecha: <span id="p-dt"></span>
+            </div>
+        </div>
+        <div class="p-row" style="font-weight:bold; border-top:1px dashed #000;">
+            <div class="p-col c-cod">COD</div>
+            <div class="p-col c-art">ARTICULO</div>
+            <div class="p-col c-can">CAN</div>
+            <div class="p-col c-val">VALOR</div>
+        </div>
+        <div id="p-items"></div>
+        <div class="p-total">TOTAL: <span id="p-total-sum"></span></div>
+        <div class="p-footer">¡Gracias por su visita!</div>
     </div>
 
     <script>
-
-        /* 商品库 */
-
-        let productos = {}
-
-        /* 读取 Google Sheets */
+        let inventory = {};
 
         fetch("https://docs.google.com/spreadsheets/d/1_XquIN3Qervm2532YWbA8-3O48RUbLgTp7ywRwIGx1I/export?format=csv")
-            .then(res => res.text())
-            .then(data => {
-
-                let filas = data.split("\n").slice(1)
-
-                filas.forEach(f => {
-
-                    let c = f.split(",")
-
-                    productos[c[0]] = {
-                        nombre: c[1],
-                        normal: parseFloat(c[2]),
-                        mayorista: parseFloat(c[3])
+            .then(r => r.text())
+            .then(csv => {
+                csv.split("\n").slice(1).forEach(row => {
+                    let cols = row.split(",");
+                    if (cols[0]) {
+                        inventory[cols[0].trim()] = { n: cols[1].trim(), p1: parseFloat(cols[2]), p2: parseFloat(cols[3]) };
                     }
+                });
+            });
 
-                })
+        const icod = document.getElementById("inCod"), iart = document.getElementById("inArt"),
+            ican = document.getElementById("inCan"), ipre = document.getElementById("inPre");
 
-            })
-
-        const codigo = document.getElementById("codigo")
-        const producto = document.getElementById("producto")
-        const cantidad = document.getElementById("cantidad")
-        const precio = document.getElementById("precio")
-
-        /* 自动商品 */
-
-        codigo.addEventListener("input", function () {
-
-            let cod = codigo.value.trim()
-
-            if (productos[cod]) {
-                producto.value = productos[cod].nombre
-            }
-
-        })
-
-        /* 自动价格 */
-
-        cantidad.addEventListener("input", function () {
-
-            let cod = codigo.value.trim()
-            let cant = parseInt(cantidad.value)
-
-            if (!productos[cod]) return
-
-            if (cant >= 3) {
-                precio.value = productos[cod].mayorista
+        // 修改点 1：只带出产品名称，不带出价格
+        icod.oninput = () => {
+            let code = icod.value.trim();
+            if (code !== "" && inventory.hasOwnProperty(code)) {
+                iart.value = inventory[code].n;
+                // 如果此时已经有数量了，就自动算一下价格
+                if (ican.value) updatePriceByQty();
             } else {
-                precio.value = productos[cod].normal
+                iart.value = "";
+                ipre.value = "";
             }
+        };
 
-        })
+        // 修改点 2：根据数量自动填充/改变单价
+        ican.oninput = updatePriceByQty;
 
-        function agregar() {
+        function updatePriceByQty() {
+            let code = icod.value.trim();
+            let qty = parseInt(ican.value) || 0;
+            let item = inventory[code];
 
-            let cod = codigo.value
-            let prod = producto.value
-            let cant = parseFloat(cantidad.value)
-            let price = parseFloat(precio.value)
-
-            if (!prod || !cant || !price) {
-                alert("Ingrese datos")
-                return
+            if (item) {
+                // 只有库里有的产品才自动填充单价
+                ipre.value = (qty >= 3) ? item.p2 : item.p1;
             }
-
-            let valor = cant * price
-
-            let fila = document.createElement("tr")
-
-            fila.innerHTML = `
-<td>${cod}</td>
-<td>${prod}</td>
-<td contenteditable="true">${cant}</td>
-<td contenteditable="true">${price}</td>
-<td>${valor.toFixed(2)}</td>
-<td><button onclick="eliminar(this)">Eliminar</button></td>
-`
-
-            document.getElementById("tabla").appendChild(fila)
-
-            activarEventos(fila)
-
-            actualizarTotal()
-
-            limpiarInputs()
-
         }
 
-        function activarEventos(fila) {
+        function addItem() {
+            if (!iart.value || !ican.value || !ipre.value) return;
+            let vCod = icod.value.trim() || "N/A";
+            let tr = document.createElement("tr");
+            tr.dataset.cod = vCod;
 
-            let cantCelda = fila.children[2]
-            let precioCelda = fila.children[3]
+            tr.innerHTML = `
+            <td>${vCod}</td>
+            <td>${iart.value}</td>
+            <td contenteditable="true" class="editable v-can">${ican.value}</td>
+            <td contenteditable="true" class="editable v-pre">${ipre.value}</td>
+            <td class="row-subtotal">${(parseFloat(ican.value) * parseFloat(ipre.value)).toFixed(2)}</td>
+            <td><button class="btn-del" onclick="this.parentElement.parentElement.remove();sync();">Eliminar</button></td>
+        `;
+            document.getElementById("mainList").appendChild(tr);
 
-            cantCelda.addEventListener("input", function () {
+            tr.querySelectorAll('.editable').forEach(cell => {
+                cell.addEventListener('input', () => {
+                    let canVal = parseFloat(tr.querySelector('.v-can').innerText) || 0;
+                    let preCell = tr.querySelector('.v-pre');
+                    let subCell = tr.querySelector('.row-subtotal');
+                    let item = inventory[tr.dataset.cod];
 
-                let valor = cantCelda.innerText.replace(/[^0-9]/g, "")
-                cantCelda.innerText = valor
-
-                let cod = fila.children[0].innerText
-                let cant = parseFloat(valor)
-                let price = parseFloat(precioCelda.innerText)
-
-                if (productos[cod]) {
-
-                    if (cant >= 3) {
-                        price = productos[cod].mayorista
-                    } else {
-                        price = productos[cod].normal
+                    // 表格内修改数量同样遵循自动调价
+                    if (cell.classList.contains('v-can') && item) {
+                        preCell.innerText = (canVal >= 3) ? item.p2 : item.p1;
                     }
 
-                    precioCelda.innerText = price
+                    let finalPre = parseFloat(preCell.innerText) || 0;
+                    subCell.innerText = (canVal * finalPre).toFixed(2);
+                    sync();
+                });
+            });
 
-                }
-
-                let total = cant * price
-
-                fila.children[4].innerText = total.toFixed(2)
-
-                actualizarTotal()
-
-            })
-
-            precioCelda.addEventListener("input", function () {
-
-                let valor = precioCelda.innerText.replace(/[^0-9.]/g, "")
-                precioCelda.innerText = valor
-
-                let cant = parseFloat(cantCelda.innerText)
-                let price = parseFloat(valor)
-
-                if (isNaN(cant) || isNaN(price)) return
-
-                let total = cant * price
-
-                fila.children[4].innerText = total.toFixed(2)
-
-                actualizarTotal()
-
-            })
-
+            sync();
+            icod.value = iart.value = ican.value = ipre.value = "";
+            icod.focus();
         }
 
-        function eliminar(btn) {
-
-            btn.parentElement.parentElement.remove()
-
-            actualizarTotal()
-
+        function sync() {
+            let total = 0;
+            let pBox = document.getElementById("p-items");
+            pBox.innerHTML = "";
+            document.querySelectorAll("#mainList tr").forEach(r => {
+                let canVal = r.querySelector('.v-can').innerText;
+                let preVal = r.querySelector('.v-pre').innerText;
+                let sub = (parseFloat(canVal) * parseFloat(preVal)).toFixed(2);
+                total += parseFloat(sub);
+                pBox.innerHTML += `<div class="p-row"><div class="p-col c-cod">${r.children[0].innerText}</div><div class="p-col c-art">${r.children[1].innerText}</div><div class="p-col c-can">${canVal}</div><div class="p-col c-val">${sub}</div></div>`;
+            });
+            document.getElementById("totalShow").innerText = "Total: $" + total.toFixed(2);
+            document.getElementById("p-total-sum").innerText = "$" + total.toFixed(2);
+            document.getElementById("p-dt").innerText = new Date().toLocaleString('es-CL');
         }
 
-        function actualizarTotal() {
-
-            let total = 0
-
-            document.querySelectorAll("#tabla tr").forEach(fila => {
-                total += parseFloat(fila.children[4].innerText)
-            })
-
-            document.getElementById("totalGeneral").innerText = "Total general: " + total.toFixed(2)
-
-        }
-
-        function limpiar() {
-
-            document.getElementById("tabla").innerHTML = ""
-            document.getElementById("totalGeneral").innerText = "Total general: 0"
-
-        }
-
-        function limpiarInputs() {
-
-            codigo.value = ""
-            producto.value = ""
-            cantidad.value = ""
-            precio.value = ""
-
-        }
-
+        function clearList() { if (confirm("¿Limpiar todo?")) { document.getElementById("mainList").innerHTML = ""; sync(); } }
     </script>
 
 </body>
 
 </html>
-```
