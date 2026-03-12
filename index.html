@@ -133,7 +133,6 @@
             #print-receipt {
                 display: block !important;
                 width: 76mm;
-                /* 调宽了小票整体宽度 */
                 margin: 0;
                 padding: 4mm;
                 background: #fff;
@@ -188,7 +187,6 @@
                 font-weight: bold;
             }
 
-            /* 重新分配比例，让调宽后的布局更均匀 */
             .c-cod {
                 width: 16%;
                 text-align: left;
@@ -249,9 +247,10 @@
         <h2>✨ Chino 99</h2>
         <div class="inputs">
             <input id="inCod" placeholder="Código">
-            <input id="inArt" placeholder="Nombre del producto">
-            <input id="inCan" type="number" placeholder="Cantidad">
-            <input id="inPre" type="number" placeholder="Unidad">
+            <input id="inArt" placeholder="Producto">
+            <input id="inCan" type="number" placeholder="Cantidad" oninput="this.value=this.value.replace(/\D/g,'')">
+            <input id="inPre" type="number" placeholder="Unidad ($)"
+                oninput="this.value=this.value.replace(/[^\d.]/g,'')">
         </div>
         <div class="btn-row">
             <button class="b-add" onclick="addItem()">Agregar</button>
@@ -314,17 +313,23 @@
 
         const icod = document.getElementById("inCod"), iart = document.getElementById("inArt"), ican = document.getElementById("inCan"), ipre = document.getElementById("inPre");
 
+        // 绑定数量改变时自动更新单价的逻辑
+        ican.addEventListener('input', updatePrice);
+
         icod.oninput = () => {
             let code = icod.value.trim();
             if (code !== "" && inventory.hasOwnProperty(code)) {
                 iart.value = inventory[code].n;
-                if (ican.value) updatePrice();
+                updatePrice();
             } else { iart.value = ""; ipre.value = ""; }
         };
-        ican.oninput = updatePrice;
+
         function updatePrice() {
-            let item = inventory[icod.value.trim()];
-            if (item) ipre.value = (parseInt(ican.value) >= 3) ? item.p2 : item.p1;
+            let code = icod.value.trim();
+            let item = inventory[code];
+            if (item && ican.value) {
+                ipre.value = (parseInt(ican.value) >= 3) ? item.p2 : item.p1;
+            }
         }
 
         function addItem() {
@@ -345,6 +350,10 @@
             document.getElementById("mainList").appendChild(tr);
             tr.querySelectorAll('.editable').forEach(cell => {
                 cell.addEventListener('input', () => {
+                    // 同样在可编辑表格里过滤非数字（防止手动修改时输入文字）
+                    if (cell.classList.contains('v-can')) cell.innerText = cell.innerText.replace(/\D/g, '');
+                    else cell.innerText = cell.innerText.replace(/[^\d.]/g, '');
+
                     let can = parseFloat(tr.querySelector('.v-can').innerText) || 0;
                     let preCell = tr.querySelector('.v-pre');
                     let item = inventory[tr.dataset.cod];
@@ -376,7 +385,6 @@
             document.getElementById("totalShow").innerText = "Total: $" + total.toFixed(2);
             document.getElementById("p-total-sum").innerText = total.toFixed(2);
 
-            // 时间格式修正：2026/3/12, 21:43:47 这种形式
             let n = new Date();
             const y = n.getFullYear();
             const m = n.getMonth() + 1;
