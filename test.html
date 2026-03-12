@@ -1,0 +1,303 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cotización</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .inputs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+            width: 140px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin: 4px;
+            border: none;
+            border-radius: 5px;
+            background: #8ddad3;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #8ddad3;
+            padding: 8px;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 6px;
+        }
+
+        .total {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h2>Cotización</h2>
+
+    <div class="inputs">
+
+        <input id="codigo" placeholder="Código">
+        <input id="producto" placeholder="Producto">
+        <input id="cantidad" type="number" placeholder="Cantidad">
+        <input id="precio" placeholder="Precio">
+
+    </div>
+
+    <div>
+
+        <button onclick="agregar()">Agregar</button>
+        <button onclick="window.print()">Imprimir</button>
+        <button onclick="limpiar()">Limpiar</button>
+
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Valor</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+
+        <tbody id="tabla"></tbody>
+
+    </table>
+
+    <div class="total" id="totalGeneral">
+        Total general: 0
+    </div>
+
+    <script>
+
+        /* 商品库 */
+
+        let productos = {}
+
+        /* 读取 Google Sheets */
+
+        fetch("https://docs.google.com/spreadsheets/d/1_XquIN3Qervm2532YWbA8-3O48RUbLgTp7ywRwIGx1I/export?format=csv")
+            .then(res => res.text())
+            .then(data => {
+
+                let filas = data.split("\n").slice(1)
+
+                filas.forEach(f => {
+
+                    let c = f.split(",")
+
+                    productos[c[0]] = {
+                        nombre: c[1],
+                        normal: parseFloat(c[2]),
+                        mayorista: parseFloat(c[3])
+                    }
+
+                })
+
+            })
+
+        const codigo = document.getElementById("codigo")
+        const producto = document.getElementById("producto")
+        const cantidad = document.getElementById("cantidad")
+        const precio = document.getElementById("precio")
+
+        /* 自动商品 */
+
+        codigo.addEventListener("input", function () {
+
+            let cod = codigo.value.trim()
+
+            if (productos[cod]) {
+                producto.value = productos[cod].nombre
+            }
+
+        })
+
+        /* 自动价格 */
+
+        cantidad.addEventListener("input", function () {
+
+            let cod = codigo.value.trim()
+            let cant = parseInt(cantidad.value)
+
+            if (!productos[cod]) return
+
+            if (cant >= 3) {
+                precio.value = productos[cod].mayorista
+            } else {
+                precio.value = productos[cod].normal
+            }
+
+        })
+
+        function agregar() {
+
+            let cod = codigo.value
+            let prod = producto.value
+            let cant = parseFloat(cantidad.value)
+            let price = parseFloat(precio.value)
+
+            if (!prod || !cant || !price) {
+                alert("Ingrese datos")
+                return
+            }
+
+            let valor = cant * price
+
+            let fila = document.createElement("tr")
+
+            fila.innerHTML = `
+<td>${cod}</td>
+<td>${prod}</td>
+<td contenteditable="true">${cant}</td>
+<td contenteditable="true">${price}</td>
+<td>${valor.toFixed(2)}</td>
+<td><button onclick="eliminar(this)">Eliminar</button></td>
+`
+
+            document.getElementById("tabla").appendChild(fila)
+
+            activarEventos(fila)
+
+            actualizarTotal()
+
+            limpiarInputs()
+
+        }
+
+        function activarEventos(fila) {
+
+            let cantCelda = fila.children[2]
+            let precioCelda = fila.children[3]
+
+            cantCelda.addEventListener("input", function () {
+
+                let valor = cantCelda.innerText.replace(/[^0-9]/g, "")
+                cantCelda.innerText = valor
+
+                let cod = fila.children[0].innerText
+                let cant = parseFloat(valor)
+                let price = parseFloat(precioCelda.innerText)
+
+                if (productos[cod]) {
+
+                    if (cant >= 3) {
+                        price = productos[cod].mayorista
+                    } else {
+                        price = productos[cod].normal
+                    }
+
+                    precioCelda.innerText = price
+
+                }
+
+                let total = cant * price
+
+                fila.children[4].innerText = total.toFixed(2)
+
+                actualizarTotal()
+
+            })
+
+            precioCelda.addEventListener("input", function () {
+
+                let valor = precioCelda.innerText.replace(/[^0-9.]/g, "")
+                precioCelda.innerText = valor
+
+                let cant = parseFloat(cantCelda.innerText)
+                let price = parseFloat(valor)
+
+                if (isNaN(cant) || isNaN(price)) return
+
+                let total = cant * price
+
+                fila.children[4].innerText = total.toFixed(2)
+
+                actualizarTotal()
+
+            })
+
+        }
+
+        function eliminar(btn) {
+
+            btn.parentElement.parentElement.remove()
+
+            actualizarTotal()
+
+        }
+
+        function actualizarTotal() {
+
+            let total = 0
+
+            document.querySelectorAll("#tabla tr").forEach(fila => {
+                total += parseFloat(fila.children[4].innerText)
+            })
+
+            document.getElementById("totalGeneral").innerText = "Total general: " + total.toFixed(2)
+
+        }
+
+        function limpiar() {
+
+            document.getElementById("tabla").innerHTML = ""
+            document.getElementById("totalGeneral").innerText = "Total general: 0"
+
+        }
+
+        function limpiarInputs() {
+
+            codigo.value = ""
+            producto.value = ""
+            cantidad.value = ""
+            precio.value = ""
+
+        }
+
+    </script>
+
+</body>
+
+</html>
+```
