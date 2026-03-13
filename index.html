@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* --- 手机操作界面样式 --- */
+        /* --- 手机操作界面（恢复您最满意的样式） --- */
         body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
         .app-container { max-width: 800px; margin: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
         h2 { color: #00796b; text-align: center; margin: 5px 0 15px; }
         .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 15px; }
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; outline: none; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
         
-        .btn-row { display: flex; gap: 6px; margin: 10px 0; justify-content: center; }
+        .btn-row { display: flex; gap: 6px; margin: 10px 0; }
         button { padding: 14px; border: none; border-radius: 4px; font-weight: bold; color: #fff; cursor: pointer; font-size: 15px; flex: 1; }
         .b-add { background: #4db6ac; }
         .b-print { background: #546e7a; }
@@ -23,43 +23,48 @@
         th { background: #e0f2f1; padding: 10px; border: 1px solid #eee; }
         td { padding: 10px; border: 1px solid #eee; text-align: center; }
         
-        /* 编辑区域样式 */
-        .editable { background: #fffde7; font-weight: bold; border: 1px solid #ffe082; padding: 8px; display: inline-block; width: 80%; }
+        .editable { background: #fffde7; font-weight: bold; border: 1px solid #ffe082; padding: 6px; border-radius: 3px; }
         .total-banner { text-align: right; font-size: 24px; font-weight: bold; margin-top: 15px; color: #c62828; }
-        
-        /* 恢复删除按钮文字样式 */
-        .btn-del { background: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .btn-del { background: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 4px; }
 
-        /* --- 打印样式：标准对齐 + 无黑线 --- */
+        /* --- 【核心修复】打印样式：等宽排版 --- */
         @media print {
             @page { size: 80mm auto; margin: 0; }
             body > *:not(#print-receipt) { display: none !important; }
             #print-receipt {
                 display: block !important;
-                width: 76mm;
+                width: 72mm; /* 稍微缩小宽度，防止边缘切除 */
                 margin: 0 auto;
                 padding: 5mm 0;
-                font-family: Arial, sans-serif !important;
+                /* 使用等宽字体，解决所有对齐问题 */
+                font-family: 'Courier New', Courier, monospace !important; 
                 color: #000 !important;
+                line-height: 1.2;
             }
-            #print-receipt * { text-decoration: none !important; border-bottom: none !important; }
-            
             .p-header { text-align: center; margin-bottom: 4mm; }
-            .p-name { font-size: 20pt; font-weight: bold !important; margin-bottom: 1mm; }
-            .p-contact { font-size: 10pt; text-align: left; }
+            .p-name { font-size: 22pt; font-weight: bold; }
+            .p-contact { font-size: 10pt; margin-top: 2mm; }
 
-            .p-table { width: 100%; border-collapse: collapse; margin-top: 4mm; table-layout: fixed; }
-            .p-th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 2mm 0; font-size: 9pt; }
-            .p-td { padding: 2mm 0; font-size: 9pt; vertical-align: top; word-wrap: break-word; }
+            /* 模拟虚线，热敏机打印最清晰 */
+            .p-line { border-bottom: 1px dashed #000; margin: 2mm 0; }
             
-            .c-cod { width: 45px; text-align: left; }
-            .c-art { width: auto; text-align: left; }
-            .c-can { width: 30px; text-align: center; }
-            .c-uni { width: 55px; text-align: right; }
-            .c-val { width: 65px; text-align: right; }
+            /* 表头对齐格式 */
+            .p-row { display: flex; justify-content: space-between; font-size: 9pt; padding: 1mm 0; }
+            .p-col-cod { width: 15mm; }
+            .p-col-art { flex: 1; padding: 0 1mm; }
+            .p-col-can { width: 8mm; text-align: center; }
+            .p-col-und { width: 15mm; text-align: right; }
+            .p-col-val { width: 18mm; text-align: right; }
 
-            .p-total-box { margin-top: 5mm; border-top: 2px solid #000; padding-top: 2mm; text-align: right; font-size: 18pt; font-weight: bold !important; }
-            .p-footer { text-align: center; font-size: 10pt; margin-top: 8mm; }
+            .p-total-box { 
+                margin-top: 4mm; 
+                border-top: 2px solid #000; 
+                padding-top: 2mm; 
+                text-align: right; 
+                font-size: 18pt; 
+                font-weight: bold; 
+            }
+            .p-footer { text-align: center; font-size: 10pt; margin-top: 10mm; border-top: 1px dashed #000; padding-top: 2mm; }
         }
         #print-receipt { display: none; }
     </style>
@@ -81,14 +86,7 @@
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr>
-                        <th style="width:15%">Cod</th>
-                        <th style="width:30%">Art</th>
-                        <th style="width:10%">Cant</th>
-                        <th style="width:15%">Und</th>
-                        <th style="width:15%">Val</th>
-                        <th style="width:15%">Acc</th>
-                    </tr>
+                    <tr><th>Cod</th><th>Art</th><th>Cant</th><th>Und</th><th>Val</th><th>Acc</th></tr>
                 </thead>
                 <tbody id="mainList"></tbody>
             </table>
@@ -101,23 +99,21 @@
             <div class="p-name">CHINO 99</div>
             <div class="p-contact">
                 RUT: 76781806-8<br>
-                WhatsApp: +56990987447<br>
                 DIRECCIÓN: Sazié 2765<br>
+                WhatsApp: +56990987447<br>
                 <span id="p-dt"></span>
             </div>
         </div>
-        <table class="p-table">
-            <thead>
-                <tr>
-                    <th class="p-th c-cod">COD</th>
-                    <th class="p-th c-art">ARTICULO</th>
-                    <th class="p-th c-can">CAN</th>
-                    <th class="p-th c-uni">UND</th>
-                    <th class="p-th c-val">VALOR</th>
-                </tr>
-            </thead>
-            <tbody id="p-items"></tbody>
-        </table>
+        <div class="p-line"></div>
+        <div class="p-row" style="font-weight:bold">
+            <span class="p-col-cod">COD</span>
+            <span class="p-col-art">ARTICULO</span>
+            <span class="p-col-can">CAN</span>
+            <span class="p-col-und">UND</span>
+            <span class="p-col-val">VALOR</span>
+        </div>
+        <div class="p-line"></div>
+        <div id="p-items"></div>
         <div class="p-total-box">TOTAL: $<span id="p-total-sum"></span></div>
         <div class="p-footer">¡Gracias por su compra!</div>
     </div>
@@ -126,7 +122,6 @@
         let inventory = {};
         const formatCLP = (n) => Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
-        // 获取库存数据
         fetch("https://docs.google.com/spreadsheets/d/1_XquIN3Qervm2532YWbA8-3O48RUbLgTp7ywRwIGx1I/export?format=csv&v=" + Date.now())
             .then(r => r.text())
             .then(csv => {
@@ -150,15 +145,13 @@
         ican.oninput = updatePrice;
 
         function addItem() {
-            // --- 恢复添加提示功能 ---
+            // 恢复必填提示
             if (!icod.value || !ican.value || !ipre.value) {
                 alert("Por favor complete Código, Cantidad y Precio.");
                 return;
             }
-            
             let sub = Math.round(ican.value * ipre.value);
             let tr = document.createElement("tr");
-            // 恢复 Eliminar 按钮文字
             tr.innerHTML = `
                 <td>${icod.value}</td>
                 <td>${iart.value}</td>
@@ -180,9 +173,21 @@
             let total = 0, pBox = document.getElementById("p-items");
             pBox.innerHTML = "";
             document.querySelectorAll("#mainList tr").forEach(r => {
-                let c = r.querySelector('.v-can').innerText, p = r.querySelector('.v-pre').innerText, s = Math.round(c*p);
+                let cod = r.children[0].innerText;
+                let art = r.children[1].innerText;
+                let c = r.querySelector('.v-can').innerText;
+                let p = r.querySelector('.v-pre').innerText;
+                let s = Math.round(c*p);
                 total += s;
-                pBox.innerHTML += `<tr><td class="p-td c-cod">${r.children[0].innerText}</td><td class="p-td c-art">${r.children[1].innerText}</td><td class="p-td c-can">${c}</td><td class="p-td c-uni">${formatCLP(p)}</td><td class="p-td c-val">${formatCLP(s)}</td></tr>`;
+                // 打印行：使用 Flex 布局确保每一列对齐
+                pBox.innerHTML += `
+                    <div class="p-row">
+                        <span class="p-col-cod">${cod}</span>
+                        <span class="p-col-art">${art}</span>
+                        <span class="p-col-can">${c}</span>
+                        <span class="p-col-und">${formatCLP(p)}</span>
+                        <span class="p-col-val">${formatCLP(s)}</span>
+                    </div>`;
                 r.querySelector('.row-subtotal').innerText = formatCLP(s);
             });
             document.getElementById("totalShow").innerText = "Total: $" + formatCLP(total);
