@@ -5,72 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* 界面样式 - 100% 保留原有功能 */
+        /* 操作界面 - 100% 保留原有功能 */
         body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
         .app-container { max-width: 800px; margin: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
         h2 { color: #00796b; text-align: center; margin: 5px 0 15px; }
         .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 15px; }
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; outline: none; }
-        .btn-row { display: flex; gap: 6px; margin: 10px 0; justify-content: center; flex-wrap: wrap; }
-        button { padding: 14px 18px; border: none; border-radius: 4px; font-weight: bold; color: #fff; cursor: pointer; font-size: 15px; min-width: 90px; }
-        .b-add { background: #4db6ac; flex: 1; }
-        .b-print { background: #546e7a; flex: 1; }
-        .b-clear { background: #e57373; flex: 1; }
-        .table-wrapper { width: 100%; overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 600px; }
-        th { background: #e0f2f1; padding: 10px; border: 1px solid #eee; }
-        td { padding: 10px; border: 1px solid #eee; text-align: center; }
-        .editable { background: #fffde7; font-weight: bold; border: 1px solid #ffe082; display: block; padding: 8px; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
+        .btn-row { display: flex; gap: 6px; margin: 10px 0; justify-content: center; }
+        button { padding: 14px 18px; border: none; border-radius: 4px; font-weight: bold; color: #fff; cursor: pointer; flex: 1; }
+        .b-add { background: #4db6ac; }
+        .b-print { background: #546e7a; }
+        .b-clear { background: #e57373; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #eee; text-align: center; }
+        .editable { background: #fffde7; font-weight: bold; border: 1px solid #ffe082; padding: 8px; display: block; }
         .total-banner { text-align: right; font-size: 24px; font-weight: bold; margin-top: 15px; color: #c62828; }
-        .btn-del { background: #ff5252; color: #fff; border: none; padding: 10px 0; border-radius: 4px; width: 90%; }
 
-        /* --- 【核心修复】打印区域：回归原始表格，强制对齐 --- */
+        /* --- 打印修复：回归标准对齐 --- */
         @media print {
             @page { size: 80mm auto; margin: 0; }
             body > *:not(#print-receipt) { display: none !important; }
             #print-receipt {
                 display: block !important;
-                width: 76mm; /* 稍微内缩，防止切边 */
+                width: 76mm;
                 margin: 0 auto;
-                padding: 2mm 0;
+                padding: 5mm 0;
                 background: #fff;
-                /* 关键：换回标准宽度字体，拒绝纵向拉伸 */
+                /* 关键：换回标准字体，拒绝纵向拉伸 */
                 font-family: Arial, sans-serif !important;
                 color: #000 !important;
             }
-            /* 彻底干掉链接下划线和奇怪的粗体 */
+            /* 彻底干掉 WhatsApp 横线 */
             #print-receipt * { text-decoration: none !important; font-weight: normal !important; }
             
-            .p-header { text-align: center; margin-bottom: 3mm; line-height: 1.2; }
-            .p-name { font-size: 18pt; font-weight: bold !important; margin-bottom: 1mm; }
-            .p-contact { font-size: 10pt; text-align: left; }
+            .p-header { text-align: center; margin-bottom: 5mm; }
+            .p-name { font-size: 22pt; font-weight: bold !important; margin-bottom: 2mm; }
+            .p-contact { font-size: 11pt; }
 
-            /* 关键：使用 table-layout: fixed 强制对齐列 */
-            .p-table { 
-                width: 100%; 
-                border-collapse: collapse; 
-                margin-top: 2mm; 
-                table-layout: fixed; /* 强制锁定宽度 */
-            }
-            .p-th { border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 2mm 0; font-size: 9pt; }
-            .p-td { padding: 1.5mm 0; font-size: 9pt; vertical-align: top; word-wrap: break-word; }
+            /* 使用标准表格锁定列宽，解决错位 */
+            .p-table { width: 100%; border-collapse: collapse; margin-top: 3mm; border-top: 1px solid #000; }
+            .p-th, .p-td { padding: 2mm 0; font-size: 10pt; border-bottom: 0.5px solid #ccc; text-align: center; }
             
-            /* 严死锁定每一列的物理宽度 */
-            .c-cod { width: 50px; text-align: left; }
-            .c-art { width: auto; text-align: left; }
-            .c-can { width: 35px; text-align: center; }
-            .c-uni { width: 60px; text-align: right; }
-            .c-val { width: 70px; text-align: right; }
+            /* 严格列宽分配 */
+            .c-cod { width: 15%; text-align: left; }
+            .c-art { width: 45%; text-align: left; }
+            .c-can { width: 10%; }
+            .c-uni { width: 15%; text-align: right; }
+            .c-val { width: 15%; text-align: right; }
 
-            .p-total-box { 
-                margin-top: 5mm; 
-                border-top: 2px solid #000; 
-                padding-top: 2mm;
-                text-align: right; 
-                font-size: 16pt; 
-                font-weight: bold !important; 
+            .p-total { 
+                margin-top: 5mm; border-top: 2px solid #000; padding-top: 3mm;
+                text-align: right; font-size: 18pt; font-weight: bold !important; 
             }
-            .p-footer { text-align: center; font-size: 10pt; margin-top: 8mm; }
+            .p-footer { text-align: center; font-size: 11pt; margin-top: 10mm; }
         }
         #print-receipt { display: none; }
     </style>
@@ -89,14 +76,10 @@
             <button class="b-print" onclick="window.print()">Imprimir</button>
             <button class="b-clear" onclick="clearList()">Limpiar</button>
         </div>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>Cod</th><th>Art</th><th>Cant</th><th>Und</th><th>Val</th><th>Acc</th></tr>
-                </thead>
-                <tbody id="mainList"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead><tr><th>Cod</th><th>Art</th><th>Cant</th><th>Und</th><th>Val</th><th>Acc</th></tr></thead>
+            <tbody id="mainList"></tbody>
+        </table>
         <div class="total-banner" id="totalShow">Total: $0</div>
     </div>
 
@@ -113,18 +96,16 @@
         <table class="p-table">
             <thead>
                 <tr>
-                    <th class="c-cod">COD</th>
-                    <th class="c-art">ARTICULO</th>
-                    <th class="c-can">CAN</th>
-                    <th class="c-uni">UND</th>
-                    <th class="c-val">VALOR</th>
+                    <th class="p-th c-cod">COD</th>
+                    <th class="p-th c-art">ARTICULO</th>
+                    <th class="p-th c-can">CAN</th>
+                    <th class="p-th c-uni">UND</th>
+                    <th class="p-th c-val">VALOR</th>
                 </tr>
             </thead>
             <tbody id="p-items"></tbody>
         </table>
-        <div class="p-total-box">
-            TOTAL: $<span id="p-total-sum"></span>
-        </div>
+        <div class="p-total">TOTAL: $<span id="p-total-sum"></span></div>
         <div class="p-footer">¡Gracias por su compra!</div>
     </div>
 
@@ -156,7 +137,7 @@
             if (!iart.value || !ican.value || !ipre.value) return;
             let sub = Math.round(ican.value * ipre.value);
             let tr = document.createElement("tr");
-            tr.innerHTML = `<td>${icod.value}</td><td>${iart.value}</td><td class="editable v-can" contenteditable="true">${ican.value}</td><td class="editable v-pre" contenteditable="true">${ipre.value}</td><td class="row-subtotal">${formatCLP(sub)}</td><td><button class="btn-del" onclick="this.closest('tr').remove();sync()">X</button></td>`;
+            tr.innerHTML = `<td>${icod.value}</td><td>${iart.value}</td><td class="editable v-can" contenteditable="true">${ican.value}</td><td class="editable v-pre" contenteditable="true">${ipre.value}</td><td class="row-subtotal">${formatCLP(sub)}</td><td><button style="background:#ff5252;padding:5px" onclick="this.closest('tr').remove();sync()">X</button></td>`;
             document.getElementById("mainList").appendChild(tr);
             tr.querySelectorAll('.editable').forEach(el => el.oninput = sync);
             sync(); icod.value=iart.value=ican.value=ipre.value=""; icod.focus();
@@ -170,20 +151,11 @@
             document.querySelectorAll("#mainList tr").forEach(r => {
                 let c = r.querySelector('.v-can').innerText, p = r.querySelector('.v-pre').innerText, s = Math.round(c*p);
                 total += s;
-                // 确保打印时每行都是标准的 <tr> 结构，解决错位问题
-                pBox.innerHTML += `
-                    <tr>
-                        <td class="p-td c-cod">${r.children[0].innerText}</td>
-                        <td class="p-td c-art">${r.children[1].innerText}</td>
-                        <td class="p-td c-can">${c}</td>
-                        <td class="p-td c-uni">${formatCLP(p)}</td>
-                        <td class="p-td c-val">${formatCLP(s)}</td>
-                    </tr>`;
+                pBox.innerHTML += `<tr><td class="p-td c-cod">${r.children[0].innerText}</td><td class="p-td c-art">${r.children[1].innerText}</td><td class="p-td c-can">${c}</td><td class="p-td c-uni">${formatCLP(p)}</td><td class="p-td c-val">${formatCLP(s)}</td></tr>`;
             });
             document.getElementById("totalShow").innerText = "Total: $" + formatCLP(total);
             document.getElementById("p-total-sum").innerText = formatCLP(total);
-            let n = new Date();
-            document.getElementById("p-dt").innerText = `FECHA: ${n.getFullYear()}/${n.getMonth()+1}/${n.getDate()} ${n.getHours()}:${n.getMinutes()}`;
+            document.getElementById("p-dt").innerText = "FECHA: " + new Date().toLocaleString();
         }
     </script>
 </body>
