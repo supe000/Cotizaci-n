@@ -154,7 +154,6 @@
                 font-size: 18pt;
                 font-weight: bold;
                 margin-bottom: 4mm;
-                /* 增加了名字下方的间距 */
             }
 
             .p-contact {
@@ -163,7 +162,6 @@
                 text-align: left;
                 font-weight: bold;
                 margin-top: 2mm;
-                /* 增加与名字的顶部间距 */
             }
 
             .p-table {
@@ -215,10 +213,12 @@
                 text-align: right;
             }
 
+            /* 修改后的 Total 样式：左右分布，字体调小，不加粗 */
             .p-total {
-                text-align: right;
-                font-size: 15pt;
-                font-weight: bold;
+                display: flex;
+                justify-content: space-between;
+                font-size: 12pt;
+                font-weight: normal;
                 margin-top: 4mm;
                 border-top: 2px dashed #000;
                 padding-top: 2mm;
@@ -290,13 +290,16 @@
             </div>
             <div id="p-items" style="display: contents;"></div>
         </div>
-        <div class="p-total">TOTAL: $<span id="p-total-sum"></span></div>
+        <div class="p-total">
+            <span>TOTAL:</span>
+            <span>$<span id="p-total-sum"></span></span>
+        </div>
         <div class="p-footer">¡Gracias por su compra!</div>
     </div>
 
     <script>
         let inventory = {};
-        const toInt = (n) => Math.round(parseFloat(n) || 0); // 统一转整数辅助函数
+        const toInt = (n) => Math.round(parseFloat(n) || 0);
 
         fetch("https://docs.google.com/spreadsheets/d/1_XquIN3Qervm2532YWbA8-3O48RUbLgTp7ywRwIGx1I/export?format=csv&v=" + Date.now())
             .then(r => r.text())
