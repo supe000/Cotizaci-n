@@ -5,22 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* 1. 操作界面 - 保持最原始好用的样子 */
-        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
+        /* --- 手机操作界面样式 --- */
+        body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
         .app-container { max-width: 800px; margin: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
         h2 { color: #00796b; text-align: center; margin: 5px 0 15px; }
         .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 15px; }
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
-        .btn-row { display: flex; gap: 6px; margin: 10px 0; }
-        button { padding: 14px; border: none; border-radius: 4px; font-weight: bold; color: #fff; cursor: pointer; flex: 1; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; outline: none; }
+        
+        .btn-row { display: flex; gap: 6px; margin: 10px 0; justify-content: center; }
+        button { padding: 14px; border: none; border-radius: 4px; font-weight: bold; color: #fff; cursor: pointer; font-size: 15px; flex: 1; }
         .b-add { background: #4db6ac; }
         .b-print { background: #546e7a; }
         .b-clear { background: #e57373; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
-        th, td { padding: 10px; border: 1px solid #eee; text-align: center; }
-        .editable { background: #fffde7; font-weight: bold; padding: 5px; border: 1px solid #ffe082; }
 
-        /* 2. 打印修复 - 真正解决对齐和黑线问题 */
+        .table-wrapper { width: 100%; overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 500px; }
+        th { background: #e0f2f1; padding: 10px; border: 1px solid #eee; }
+        td { padding: 10px; border: 1px solid #eee; text-align: center; }
+        
+        /* 编辑区域样式 */
+        .editable { background: #fffde7; font-weight: bold; border: 1px solid #ffe082; padding: 8px; display: inline-block; width: 80%; }
+        .total-banner { text-align: right; font-size: 24px; font-weight: bold; margin-top: 15px; color: #c62828; }
+        
+        /* 恢复删除按钮文字样式 */
+        .btn-del { background: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+        /* --- 打印样式：标准对齐 + 无黑线 --- */
         @media print {
             @page { size: 80mm auto; margin: 0; }
             body > *:not(#print-receipt) { display: none !important; }
@@ -28,43 +38,28 @@
                 display: block !important;
                 width: 76mm;
                 margin: 0 auto;
-                padding: 4mm 0;
+                padding: 5mm 0;
                 font-family: Arial, sans-serif !important;
                 color: #000 !important;
             }
-            /* 强制干掉 WhatsApp 和所有链接的下划线 */
-            #print-receipt * { text-decoration: none !important; border: none !important; }
+            #print-receipt * { text-decoration: none !important; border-bottom: none !important; }
             
-            .p-header { text-align: center; margin-bottom: 3mm; line-height: 1.4; }
-            .p-name { font-size: 20pt; font-weight: bold; margin-bottom: 1mm; }
+            .p-header { text-align: center; margin-bottom: 4mm; }
+            .p-name { font-size: 20pt; font-weight: bold !important; margin-bottom: 1mm; }
             .p-contact { font-size: 10pt; text-align: left; }
 
-            /* 核心：使用 table-layout: fixed 确保列宽锁死，不乱跑 */
-            .p-table { 
-                width: 100%; 
-                border-collapse: collapse; 
-                margin-top: 4mm; 
-                table-layout: fixed; 
-            }
+            .p-table { width: 100%; border-collapse: collapse; margin-top: 4mm; table-layout: fixed; }
             .p-th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 2mm 0; font-size: 9pt; }
             .p-td { padding: 2mm 0; font-size: 9pt; vertical-align: top; word-wrap: break-word; }
             
-            /* 严格锁定每一列的物理宽度 */
             .c-cod { width: 45px; text-align: left; }
-            .c-art { width: auto; text-align: left; padding: 0 1mm; }
+            .c-art { width: auto; text-align: left; }
             .c-can { width: 30px; text-align: center; }
-            .c-uni { width: 60px; text-align: right; }
-            .c-val { width: 70px; text-align: right; }
+            .c-uni { width: 55px; text-align: right; }
+            .c-val { width: 65px; text-align: right; }
 
-            .p-total-box { 
-                margin-top: 5mm; 
-                border-top: 2px solid #000; 
-                padding-top: 2mm; 
-                text-align: right; 
-                font-size: 18pt; 
-                font-weight: bold; 
-            }
-            .p-footer { text-align: center; font-size: 10pt; margin-top: 10mm; }
+            .p-total-box { margin-top: 5mm; border-top: 2px solid #000; padding-top: 2mm; text-align: right; font-size: 18pt; font-weight: bold !important; }
+            .p-footer { text-align: center; font-size: 10pt; margin-top: 8mm; }
         }
         #print-receipt { display: none; }
     </style>
@@ -83,9 +78,18 @@
             <button class="b-print" onclick="window.print()">Imprimir</button>
             <button class="b-clear" onclick="clearList()">Limpiar</button>
         </div>
-        <div style="overflow-x:auto">
+        <div class="table-wrapper">
             <table>
-                <thead><tr><th>Cod</th><th>Art</th><th>Cant</th><th>Und</th><th>Val</th><th>Acc</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th style="width:15%">Cod</th>
+                        <th style="width:30%">Art</th>
+                        <th style="width:10%">Cant</th>
+                        <th style="width:15%">Und</th>
+                        <th style="width:15%">Val</th>
+                        <th style="width:15%">Acc</th>
+                    </tr>
+                </thead>
                 <tbody id="mainList"></tbody>
             </table>
         </div>
@@ -122,6 +126,7 @@
         let inventory = {};
         const formatCLP = (n) => Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
+        // 获取库存数据
         fetch("https://docs.google.com/spreadsheets/d/1_XquIN3Qervm2532YWbA8-3O48RUbLgTp7ywRwIGx1I/export?format=csv&v=" + Date.now())
             .then(r => r.text())
             .then(csv => {
@@ -132,10 +137,12 @@
             });
 
         const icod = document.getElementById("inCod"), iart = document.getElementById("inArt"), ican = document.getElementById("inCan"), ipre = document.getElementById("inPre");
+        
         icod.oninput = () => {
             let item = inventory[icod.value.trim()];
             if (item) { iart.value = item.n; updatePrice(); }
         };
+
         function updatePrice() {
             let item = inventory[icod.value.trim()];
             if (item && ican.value) ipre.value = Math.round(parseInt(ican.value) >= 3 ? item.p2 : item.p1);
@@ -143,16 +150,31 @@
         ican.oninput = updatePrice;
 
         function addItem() {
-            if (!iart.value || !ican.value || !ipre.value) return;
+            // --- 恢复添加提示功能 ---
+            if (!icod.value || !ican.value || !ipre.value) {
+                alert("Por favor complete Código, Cantidad y Precio.");
+                return;
+            }
+            
             let sub = Math.round(ican.value * ipre.value);
             let tr = document.createElement("tr");
-            tr.innerHTML = `<td>${icod.value}</td><td>${iart.value}</td><td class="editable v-can" contenteditable="true">${ican.value}</td><td class="editable v-pre" contenteditable="true">${ipre.value}</td><td>${formatCLP(sub)}</td><td><button style="background:#ff5252;border:none;color:#fff;padding:5px 10px;border-radius:4px" onclick="this.closest('tr').remove();sync()">X</button></td>`;
+            // 恢复 Eliminar 按钮文字
+            tr.innerHTML = `
+                <td>${icod.value}</td>
+                <td>${iart.value}</td>
+                <td><span class="editable v-can" contenteditable="true">${ican.value}</span></td>
+                <td><span class="editable v-pre" contenteditable="true">${ipre.value}</span></td>
+                <td class="row-subtotal">${formatCLP(sub)}</td>
+                <td><button class="btn-del" onclick="this.closest('tr').remove();sync()">Eliminar</button></td>
+            `;
             document.getElementById("mainList").appendChild(tr);
             tr.querySelectorAll('.editable').forEach(el => el.oninput = sync);
-            sync(); icod.value=iart.value=ican.value=ipre.value=""; icod.focus();
+            sync(); 
+            icod.value = iart.value = ican.value = ipre.value = ""; 
+            icod.focus();
         }
 
-        function clearList() { if(confirm("¿Limpiar?")) { document.getElementById("mainList").innerHTML=""; sync(); } }
+        function clearList() { if(confirm("¿Limpiar todo?")) { document.getElementById("mainList").innerHTML=""; sync(); } }
 
         function sync() {
             let total = 0, pBox = document.getElementById("p-items");
@@ -161,6 +183,7 @@
                 let c = r.querySelector('.v-can').innerText, p = r.querySelector('.v-pre').innerText, s = Math.round(c*p);
                 total += s;
                 pBox.innerHTML += `<tr><td class="p-td c-cod">${r.children[0].innerText}</td><td class="p-td c-art">${r.children[1].innerText}</td><td class="p-td c-can">${c}</td><td class="p-td c-uni">${formatCLP(p)}</td><td class="p-td c-val">${formatCLP(s)}</td></tr>`;
+                r.querySelector('.row-subtotal').innerText = formatCLP(s);
             });
             document.getElementById("totalShow").innerText = "Total: $" + formatCLP(total);
             document.getElementById("p-total-sum").innerText = formatCLP(total);
