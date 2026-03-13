@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* 界面样式 - 100% 保留所有原有功能 */
+        /* --- 手机操作界面样式 (100%保留功能) --- */
         body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
         .app-container { max-width: 800px; margin: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
         h2 { color: #00796b; text-align: center; margin: 5px 0 15px; }
@@ -24,7 +24,7 @@
         .total-banner { text-align: right; font-size: 24px; font-weight: bold; margin-top: 15px; color: #c62828; }
         .btn-del { background: #ff5252; color: #fff; border: none; padding: 10px 0; border-radius: 4px; width: 90%; }
 
-        /* --- 打印样式：回归电脑端整齐感 --- */
+        /* --- 打印样式：回归电脑版整齐风格 --- */
         @media print {
             @page { size: 80mm auto; margin: 0; }
             body > *:not(#print-receipt) { display: none !important; }
@@ -34,32 +34,33 @@
                 margin: 0 auto;
                 padding: 5mm 0;
                 background: #fff;
-                /* 关键：换回细体字，整齐美观 */
+                /* 换回清爽字体 */
                 font-family: 'Helvetica', 'Arial', sans-serif !important;
                 color: #000 !important;
                 line-height: 1.3;
             }
-            /* 强制去掉所有下划线和加粗 */
+            /* 1. 彻底删除横线 2. 取消超粗字体 */
             #print-receipt * { text-decoration: none !important; font-weight: normal !important; }
             
             .p-header { text-align: center; margin-bottom: 4mm; }
-            .p-name { font-size: 22pt; font-weight: bold !important; margin-bottom: 2mm; }
-            .p-contact { font-size: 11pt; text-align: center; }
+            .p-name { font-size: 20pt; font-weight: bold !important; margin-bottom: 1mm; }
+            .p-contact { font-size: 10.5pt; text-align: center; }
 
+            /* 重新使用表格布局，确保字段对齐 */
             .p-table { width: 100%; border-collapse: collapse; margin-top: 3mm; border-top: 1px solid #000; }
-            .p-th, .p-td { padding: 1.5mm 0; font-size: 10pt; border-bottom: 0.5px solid #eee; }
-            .c-cod { width: 45px; text-align: left; font-size: 8pt; }
+            .p-th, .p-td { padding: 1.5mm 0; font-size: 9.5pt; border-bottom: 0.5px solid #ccc; }
+            .c-cod { width: 45px; text-align: left; }
             .c-art { text-align: left; padding-left: 1mm; }
             .c-can { width: 30px; text-align: center; }
             .c-uni { width: 55px; text-align: right; }
             .c-val { width: 65px; text-align: right; }
 
             .p-total-box { 
-                margin-top: 5mm; padding-top: 2mm; 
+                margin-top: 4mm; padding-top: 2mm; 
                 border-top: 2px solid #000; 
-                text-align: right; font-size: 18pt; font-weight: bold !important; 
+                text-align: right; font-size: 16pt; font-weight: bold !important; 
             }
-            .p-footer { text-align: center; font-size: 11pt; margin-top: 10mm; }
+            .p-footer { text-align: center; font-size: 10.5pt; margin-top: 8mm; }
         }
         #print-receipt { display: none; }
     </style>
@@ -94,7 +95,8 @@
             <div class="p-name">CHINO 99</div>
             <div class="p-contact">
                 RUT: 76781806-8<br>
-                WhatsApp: +56990987447 | Sazié 2765<br>
+                WhatsApp: +56990987447<br>
+                Sazié 2765, Santiago<br>
                 <span id="p-dt"></span>
             </div>
         </div>
@@ -117,7 +119,6 @@
     </div>
 
     <script>
-        // 核心逻辑保持 100% 原始不变
         let inventory = {};
         const formatCLP = (n) => Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
