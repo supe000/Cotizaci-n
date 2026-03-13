@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* --- 手机操作界面样式 (100%保留功能) --- */
+        /* --- 手机操作界面（保持原样，不改动） --- */
         body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
         .app-container { max-width: 800px; margin: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
         h2 { color: #00796b; text-align: center; margin: 5px 0 15px; }
@@ -24,7 +24,7 @@
         .total-banner { text-align: right; font-size: 24px; font-weight: bold; margin-top: 15px; color: #c62828; }
         .btn-del { background: #ff5252; color: #fff; border: none; padding: 10px 0; border-radius: 4px; width: 90%; }
 
-        /* --- 打印样式：回归电脑版整齐风格 --- */
+        /* --- 【核心修复】打印区域：回归标准表格 --- */
         @media print {
             @page { size: 80mm auto; margin: 0; }
             body > *:not(#print-receipt) { display: none !important; }
@@ -32,35 +32,34 @@
                 display: block !important;
                 width: 76mm;
                 margin: 0 auto;
-                padding: 5mm 0;
+                padding: 4mm 0;
                 background: #fff;
-                /* 换回清爽字体 */
-                font-family: 'Helvetica', 'Arial', sans-serif !important;
+                /* 修复点：换回标准宽度字体，不加粗，防止拉长 */
+                font-family: "Courier New", Courier, monospace !important;
                 color: #000 !important;
-                line-height: 1.3;
             }
-            /* 1. 彻底删除横线 2. 取消超粗字体 */
+            /* 强制干掉 WhatsApp 下划线 */
             #print-receipt * { text-decoration: none !important; font-weight: normal !important; }
             
-            .p-header { text-align: center; margin-bottom: 4mm; }
-            .p-name { font-size: 20pt; font-weight: bold !important; margin-bottom: 1mm; }
-            .p-contact { font-size: 10.5pt; text-align: center; }
+            .p-header { text-align: center; margin-bottom: 3mm; border-bottom: 2px solid #000; padding-bottom: 2mm; }
+            .p-name { font-size: 18pt; font-weight: bold !important; margin-bottom: 1mm; }
+            .p-contact { font-size: 10pt; text-align: left; line-height: 1.2; }
 
-            /* 重新使用表格布局，确保字段对齐 */
-            .p-table { width: 100%; border-collapse: collapse; margin-top: 3mm; border-top: 1px solid #000; }
-            .p-th, .p-td { padding: 1.5mm 0; font-size: 9.5pt; border-bottom: 0.5px solid #ccc; }
-            .c-cod { width: 45px; text-align: left; }
-            .c-art { text-align: left; padding-left: 1mm; }
-            .c-can { width: 30px; text-align: center; }
-            .c-uni { width: 55px; text-align: right; }
-            .c-val { width: 65px; text-align: right; }
+            /* 关键：使用标准表格解决对齐问题 */
+            .p-table { width: 100%; border-collapse: collapse; margin-top: 2mm; table-layout: fixed; }
+            .p-th { border-bottom: 2px solid #000; font-size: 10pt; padding: 2mm 0; }
+            .p-td { padding: 1.5mm 0; font-size: 10pt; word-wrap: break-word; vertical-align: top; }
+            
+            /* 严死锁定各列宽度 */
+            .c-cod { width: 55px; text-align: left; }
+            .c-art { text-align: left; }
+            .c-can { width: 35px; text-align: center; }
+            .c-uni { width: 60px; text-align: right; }
+            .c-val { width: 70px; text-align: right; }
 
-            .p-total-box { 
-                margin-top: 4mm; padding-top: 2mm; 
-                border-top: 2px solid #000; 
-                text-align: right; font-size: 16pt; font-weight: bold !important; 
-            }
-            .p-footer { text-align: center; font-size: 10.5pt; margin-top: 8mm; }
+            .p-total-row { border-top: 2px solid #000; }
+            .p-total-text { font-size: 18pt; font-weight: bold !important; padding-top: 3mm; text-align: right; }
+            .p-footer { text-align: center; font-size: 10pt; margin-top: 8mm; border-top: 1px dashed #ccc; padding-top: 2mm; }
         }
         #print-receipt { display: none; }
     </style>
@@ -96,7 +95,7 @@
             <div class="p-contact">
                 RUT: 76781806-8<br>
                 WhatsApp: +56990987447<br>
-                Sazié 2765, Santiago<br>
+                DIRECCIÓN: Sazié 2765<br>
                 <span id="p-dt"></span>
             </div>
         </div>
@@ -112,8 +111,8 @@
             </thead>
             <tbody id="p-items"></tbody>
         </table>
-        <div class="p-total-box">
-            TOTAL: $<span id="p-total-sum"></span>
+        <div class="p-total-row">
+            <div class="p-total-text">TOTAL: $<span id="p-total-sum"></span></div>
         </div>
         <div class="p-footer">¡Gracias por su compra!</div>
     </div>
@@ -132,10 +131,12 @@
             });
 
         const icod = document.getElementById("inCod"), iart = document.getElementById("inArt"), ican = document.getElementById("inCan"), ipre = document.getElementById("inPre");
+        
         icod.oninput = () => {
             let item = inventory[icod.value.trim()];
             if (item) { iart.value = item.n; updatePrice(); }
         };
+
         function updatePrice() {
             let item = inventory[icod.value.trim()];
             if (item && ican.value) ipre.value = Math.round(parseInt(ican.value) >= 3 ? item.p2 : item.p1);
@@ -146,7 +147,7 @@
             if (!iart.value || !ican.value || !ipre.value) return;
             let sub = Math.round(ican.value * ipre.value);
             let tr = document.createElement("tr");
-            tr.innerHTML = `<td>${icod.value}</td><td>${iart.value}</td><td class="editable v-can" contenteditable="true">${ican.value}</td><td class="editable v-pre" contenteditable="true">${ipre.value}</td><td class="row-subtotal">${formatCLP(sub)}</td><td><button class="btn-del" onclick="this.closest('tr').remove();sync()">X</button></td>`;
+            tr.innerHTML = `<td>${icod.value.trim()}</td><td>${iart.value}</td><td class="editable v-can" contenteditable="true">${ican.value}</td><td class="editable v-pre" contenteditable="true">${ipre.value}</td><td class="row-subtotal">${formatCLP(sub)}</td><td><button class="btn-del" onclick="this.closest('tr').remove();sync()">X</button></td>`;
             document.getElementById("mainList").appendChild(tr);
             tr.querySelectorAll('.editable').forEach(el => el.oninput = sync);
             sync(); icod.value=iart.value=ican.value=ipre.value=""; icod.focus();
