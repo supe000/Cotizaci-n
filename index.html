@@ -6,234 +6,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* --- 网页界面样式 --- */
-        body {
-            font-family: -apple-system, sans-serif;
-            background: #f4f7f6;
-            margin: 0;
-            padding: 10px;
+        /* --- 网页界面样式：仅增强适配性，不改动功能 --- */
+        body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
+        .app-container { max-width: 800px; margin: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); }
+        h2 { color: #00796b; text-align: center; margin: 5px 0 15px; font-size: 22px; }
+        
+        /* 适配手机端的输入框布局 */
+        .inputs { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 8px; 
+            margin-bottom: 15px; 
         }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; outline: none; }
 
-        .app-container {
-            max-width: 800px;
-            margin: auto;
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
-        }
+        .btn-row { display: flex; gap: 6px; margin: 10px 0; justify-content: center; flex-wrap: wrap; }
+        button { padding: 10px 18px; border: none; border-radius: 4px; font-weight: bold; color: #fff; cursor: pointer; font-size: 14px; min-width: 80px; }
+        .b-add { background: #4db6ac; flex: 1; }
+        .b-print { background: #546e7a; flex: 1; }
+        .b-clear { background: #e57373; flex: 1; }
 
-        h2 {
-            color: #00796b;
-            text-align: center;
-            margin: 5px 0 15px;
-            font-size: 22px;
-        }
+        /* 核心修复：表格手机端横向滚动，不挤压内容 */
+        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 550px; table-layout: fixed; }
+        
+        th { background: #e0f2f1; padding: 10px; border: 1px solid #eee; color: #333; }
+        td { padding: 10px; border: 1px solid #eee; text-align: center; word-break: break-all; }
+        .editable { background: #fffde7; font-weight: bold; outline: none; border: 1px solid #ffe082; }
+        .total-banner { text-align: right; font-size: 24px; font-weight: bold; margin-top: 15px; color: #c62828; }
+        .btn-del { background: #ff5252; color: #fff; border: none; padding: 5px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; }
 
-        .inputs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 15px;
-            width: 130px;
-            outline: none;
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 6px;
-            margin: 10px 0;
-            justify-content: center;
-        }
-
-        button {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            color: #fff;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .b-add {
-            background: #4db6ac;
-        }
-
-        .b-print {
-            background: #546e7a;
-        }
-
-        .b-clear {
-            background: #e57373;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            margin-top: 10px;
-            table-layout: fixed;
-        }
-
-        th {
-            background: #e0f2f1;
-            padding: 10px;
-            border: 1px solid #eee;
-            color: #333;
-        }
-
-        td {
-            padding: 10px;
-            border: 1px solid #eee;
-            text-align: center;
-            word-break: break-all;
-        }
-
-        .editable {
-            background: #fffde7;
-            font-weight: bold;
-            outline: none;
-            border: 1px solid #ffe082;
-        }
-
-        .total-banner {
-            text-align: right;
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 15px;
-            color: #c62828;
-        }
-
-        .btn-del {
-            background: #ff5252;
-            color: #fff;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        /* --- 打印样式控制 (适配 80mm 热敏纸) --- */
+        /* --- 打印样式控制 (严格保留 80mm 适配版) --- */
         @media print {
-            @page {
-                margin: 0;
-            }
-
-            body>*:not(#print-receipt) {
-                display: none !important;
-            }
-
+            @page { margin: 0; }
+            body>*:not(#print-receipt) { display: none !important; }
             #print-receipt {
                 display: block !important;
-                width: 76mm;
+                width: 76mm; 
                 margin: 0 auto;
                 padding: 4mm 1mm;
                 background: #fff;
                 font-family: 'Courier New', monospace;
                 color: #000;
             }
-
-            .p-header {
-                border-bottom: 1.5px dashed #000;
-                padding-bottom: 2mm;
-                margin-bottom: 3mm;
-                text-align: center;
-            }
-
-            .p-name {
-                font-size: 18pt;
-                font-weight: bold;
-                margin-bottom: 4mm;
-            }
-
-            .p-contact {
-                font-size: 9.5pt;
-                line-height: 1.4;
-                text-align: left;
-                font-weight: bold;
-                margin-top: 2mm;
-            }
-
-            .p-table {
-                display: table;
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .p-row {
-                display: table-row;
-            }
-
-            .p-row.p-head {
-                font-weight: bold;
-                border-bottom: 1px dashed #000;
-            }
-
-            .p-col {
-                display: table-cell;
-                vertical-align: top;
-                padding: 1.5mm 0;
-                font-size: 10pt;
-            }
-
-            .c-cod {
-                width: 18%;
-                text-align: left;
-            }
-
-            .c-art {
-                width: 34%;
-                text-align: left;
-                word-break: break-all;
-                line-height: 1.1;
-            }
-
-            .c-can {
-                width: 10%;
-                text-align: center;
-            }
-
-            .c-uni {
-                width: 16%;
-                text-align: center;
-            }
-
-            .c-val {
-                width: 22%;
-                text-align: right;
-            }
-
-            /* 修改后的 Total 样式：左右分布，字体调小，不加粗 */
-            .p-total {
+            .p-header { border-bottom: 1.5px dashed #000; padding-bottom: 2mm; margin-bottom: 3mm; text-align: center; }
+            .p-name { font-size: 18pt; font-weight: bold; margin-bottom: 4mm; }
+            .p-contact { font-size: 9.5pt; line-height: 1.4; text-align: left; font-weight: bold; margin-top: 2mm; }
+            .p-table { display: table; width: 100%; border-collapse: collapse; }
+            .p-row { display: table-row; }
+            .p-row.p-head { font-weight: bold; border-bottom: 1px dashed #000; }
+            .p-col { display: table-cell; vertical-align: top; padding: 1.5mm 0; font-size: 10pt; }
+            .c-cod { width: 18%; text-align: left; }
+            .c-art { width: 34%; text-align: left; word-break: break-all; line-height: 1.1; }
+            .c-can { width: 10%; text-align: center; }
+            .c-uni { width: 16%; text-align: center; }
+            .c-val { width: 22%; text-align: right; }
+            
+            .p-total { 
                 display: flex;
                 justify-content: space-between;
-                font-size: 12pt;
-                font-weight: normal;
-                margin-top: 4mm;
-                border-top: 2px dashed #000;
-                padding-top: 2mm;
+                font-size: 12pt; 
+                font-weight: normal; 
+                margin-top: 4mm; 
+                border-top: 2px dashed #000; 
+                padding-top: 2mm; 
             }
-
-            .p-footer {
-                text-align: center;
-                font-size: 10pt;
-                margin-top: 6mm;
-            }
+            .p-footer { text-align: center; font-size: 10pt; margin-top: 6mm; }
         }
-
-        #print-receipt {
-            display: none;
-        }
+        #print-receipt { display: none; }
     </style>
 </head>
 
@@ -244,21 +84,21 @@
             <input id="inCod" placeholder="Código">
             <input id="inArt" placeholder="Producto">
             <input id="inCan" type="number" placeholder="Cantidad" oninput="this.value=this.value.replace(/\D/g,'')">
-            <input id="inPre" type="number" placeholder="Unidad ($)"
-                oninput="this.value=this.value.replace(/[^\d.]/g,'')">
+            <input id="inPre" type="number" placeholder="Unidad ($)" oninput="this.value=this.value.replace(/[^\d.]/g,'')">
         </div>
         <div class="btn-row">
             <button class="b-add" onclick="addItem()">Agregar</button>
             <button class="b-print" onclick="window.print()">Imprimir</button>
             <button class="b-clear" onclick="clearList()">Limpiar</button>
         </div>
-        <div style="overflow-x:auto;">
+        
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
                         <th style="width:15%">Código</th>
                         <th style="width:30%">Producto</th>
-                        <th style="width:10%">Cantidad</th>
+                        <th style="width:10%">Cant</th>
                         <th style="width:15%">Unidad</th>
                         <th style="width:15%">Valor</th>
                         <th style="width:15%">Acciones</th>
@@ -350,7 +190,7 @@
                 cell.addEventListener('input', () => {
                     let raw = cell.innerText;
                     let clean = cell.classList.contains('v-can') ? raw.replace(/\D/g, '') : raw.replace(/[^\d.]/g, '');
-
+                    
                     if (raw !== clean) {
                         cell.innerText = clean;
                         const range = document.createRange();
@@ -364,11 +204,12 @@
                     let can = parseFloat(tr.querySelector('.v-can').innerText) || 0;
                     let preCell = tr.querySelector('.v-pre');
                     let item = inventory[tr.dataset.cod];
-
+                    
+                    // 严格保留批发价格逻辑
                     if (item && cell.classList.contains('v-can')) {
                         preCell.innerText = toInt((can >= 3) ? item.p2 : item.p1);
                     }
-
+                    
                     tr.querySelector('.row-subtotal').innerText = toInt(can * (parseFloat(preCell.innerText) || 0));
                     sync();
                 });
@@ -397,11 +238,10 @@
             document.getElementById("p-total-sum").innerText = total;
 
             let n = new Date();
-            document.getElementById("p-dt").innerText = `FECHA: ${n.getFullYear()}/${n.getMonth() + 1}/${n.getDate()}, ${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}:${String(n.getSeconds()).padStart(2, '0')}`;
+            document.getElementById("p-dt").innerText = `FECHA: ${n.getFullYear()}/${n.getMonth()+1}/${n.getDate()}, ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
         }
 
         function clearList() { if (confirm("¿Limpiar?")) { document.getElementById("mainList").innerHTML = ""; sync(); } }
     </script>
 </body>
-
 </html>
