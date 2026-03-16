@@ -1,92 +1,293 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* --- 手机操作界面（恢复您最满意的样式） --- */
-        body { font-family: -apple-system, sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
-        .app-container { max-width: 800px; margin: auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
-        h2 { color: #00796b; text-align: center; margin: 5px 0 15px; }
-        .inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 15px; }
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; }
-        
-        .btn-row { display: flex; gap: 6px; margin: 10px 0; }
-        button { padding: 14px; border: none; border-radius: 4px; font-weight: bold; color: #fff; cursor: pointer; font-size: 15px; flex: 1; }
-        .b-add { background: #4db6ac; }
-        .b-print { background: #546e7a; }
-        .b-clear { background: #e57373; }
+        /* --- 网页界面样式 --- */
+        body {
+            font-family: -apple-system, sans-serif;
+            background: #f4f7f6;
+            margin: 0;
+            padding: 10px;
+        }
 
-        .table-wrapper { width: 100%; overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 500px; }
-        th { background: #e0f2f1; padding: 10px; border: 1px solid #eee; }
-        td { padding: 10px; border: 1px solid #eee; text-align: center; }
-        
-        .editable { background: #fffde7; font-weight: bold; border: 1px solid #ffe082; padding: 6px; border-radius: 3px; }
-        .total-banner { text-align: right; font-size: 24px; font-weight: bold; margin-top: 15px; color: #c62828; }
-        .btn-del { background: #ff5252; color: white; border: none; padding: 8px 12px; border-radius: 4px; }
+        .app-container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+        }
 
-        /* --- 【核心修复】打印样式：等宽排版 --- */
+        h2 {
+            color: #00796b;
+            text-align: center;
+            margin: 5px 0 15px;
+            font-size: 22px;
+        }
+
+        .inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            margin: 10px 0;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 80px;
+        }
+
+        .b-add {
+            background: #4db6ac;
+            flex: 1;
+        }
+
+        .b-print {
+            background: #546e7a;
+            flex: 1;
+        }
+
+        .b-clear {
+            background: #e57373;
+            flex: 1;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 600px;
+            table-layout: fixed;
+        }
+
+        th {
+            background: #e0f2f1;
+            padding: 10px;
+            border: 1px solid #eee;
+            color: #333;
+        }
+
+        td {
+            padding: 10px;
+            border: 1px solid #eee;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .col-cant {
+            width: 15% !important;
+        }
+
+        .editable {
+            background: #fffde7;
+            font-weight: bold;
+            outline: none;
+            border: 1px solid #ffe082;
+            display: block;
+            padding: 8px 4px;
+            min-height: 20px;
+        }
+
+        .total-banner {
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #c62828;
+        }
+
+        /* 彻底简化的删除按钮，去掉点和修饰 */
+        .btn-del {
+            background: #ff5252;
+            color: #fff;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            width: 90%;
+            cursor: pointer;
+            outline: none;
+            box-shadow: none;
+            -webkit-appearance: none;
+        }
+
+        /* --- 打印样式控制 (80mm 适配版) --- */
         @media print {
-            @page { size: 80mm auto; margin: 0; }
-            body > *:not(#print-receipt) { display: none !important; }
+            @page {
+                margin: 0;
+            }
+
+            body>*:not(#print-receipt) {
+                display: none !important;
+            }
+
             #print-receipt {
                 display: block !important;
-                width: 72mm; /* 稍微缩小宽度，防止边缘切除 */
+                width: 76mm;
                 margin: 0 auto;
-                padding: 5mm 0;
-                /* 使用等宽字体，解决所有对齐问题 */
-                font-family: 'Courier New', Courier, monospace !important; 
-                color: #000 !important;
-                line-height: 1.2;
+                padding: 4mm 1mm;
+                background: #fff;
+                font-family: 'Courier New', monospace;
+                color: #000;
             }
-            .p-header { text-align: center; margin-bottom: 4mm; }
-            .p-name { font-size: 22pt; font-weight: bold; }
-            .p-contact { font-size: 10pt; margin-top: 2mm; }
 
-            /* 模拟虚线，热敏机打印最清晰 */
-            .p-line { border-bottom: 1px dashed #000; margin: 2mm 0; }
-            
-            /* 表头对齐格式 */
-            .p-row { display: flex; justify-content: space-between; font-size: 9pt; padding: 1mm 0; }
-            .p-col-cod { width: 15mm; }
-            .p-col-art { flex: 1; padding: 0 1mm; }
-            .p-col-can { width: 8mm; text-align: center; }
-            .p-col-und { width: 15mm; text-align: right; }
-            .p-col-val { width: 18mm; text-align: right; }
-
-            .p-total-box { 
-                margin-top: 4mm; 
-                border-top: 2px solid #000; 
-                padding-top: 2mm; 
-                text-align: right; 
-                font-size: 18pt; 
-                font-weight: bold; 
+            .p-header {
+                border-bottom: 1.5px dashed #000;
+                padding-bottom: 2mm;
+                margin-bottom: 3mm;
+                text-align: center;
             }
-            .p-footer { text-align: center; font-size: 10pt; margin-top: 10mm; border-top: 1px dashed #000; padding-top: 2mm; }
+
+            .p-name {
+                font-size: 18pt;
+                font-weight: bold;
+                margin-bottom: 4mm;
+            }
+
+            .p-contact {
+                font-size: 9.5pt;
+                line-height: 1.4;
+                text-align: left;
+                font-weight: bold;
+                margin-top: 2mm;
+            }
+
+            .p-table {
+                display: table;
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .p-row {
+                display: table-row;
+            }
+
+            .p-row.p-head {
+                font-weight: bold;
+                border-bottom: 1px dashed #000;
+            }
+
+            .p-col {
+                display: table-cell;
+                vertical-align: top;
+                padding: 1.5mm 0;
+                font-size: 10pt;
+            }
+
+            .c-cod {
+                width: 18%;
+                text-align: left;
+            }
+
+            .c-art {
+                width: 34%;
+                text-align: left;
+                word-break: break-all;
+                line-height: 1.1;
+            }
+
+            .c-can {
+                width: 10%;
+                text-align: center;
+            }
+
+            .c-uni {
+                width: 16%;
+                text-align: center;
+            }
+
+            .c-val {
+                width: 22%;
+                text-align: right;
+            }
+
+            .p-total {
+                display: flex;
+                justify-content: space-between;
+                font-size: 12pt;
+                font-weight: normal;
+                margin-top: 4mm;
+                border-top: 2px dashed #000;
+                padding-top: 2mm;
+            }
+
+            .p-footer {
+                text-align: center;
+                font-size: 10pt;
+                margin-top: 6mm;
+            }
         }
-        #print-receipt { display: none; }
+
+        #print-receipt {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
     <div class="app-container">
         <h2>✨ Chino 99</h2>
         <div class="inputs">
             <input id="inCod" placeholder="Código">
             <input id="inArt" placeholder="Producto">
-            <input id="inCan" type="number" placeholder="Cant">
-            <input id="inPre" type="number" placeholder="Precio ($)">
+            <input id="inCan" type="number" placeholder="Cantidad" oninput="this.value=this.value.replace(/\D/g,'')">
+            <input id="inPre" type="number" placeholder="Unidad ($)"
+                oninput="this.value=this.value.replace(/[^\d.]/g,'')">
         </div>
         <div class="btn-row">
             <button class="b-add" onclick="addItem()">Agregar</button>
             <button class="b-print" onclick="window.print()">Imprimir</button>
             <button class="b-clear" onclick="clearList()">Limpiar</button>
         </div>
+
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>Cod</th><th>Art</th><th>Cant</th><th>Und</th><th>Val</th><th>Acc</th></tr>
+                    <tr>
+                        <th style="width:15%">Código</th>
+                        <th style="width:25%">Producto</th>
+                        <th class="col-cant">Cant</th>
+                        <th style="width:15%">Unidad</th>
+                        <th style="width:15%">Valor</th>
+                        <th style="width:15%">Acciones</th>
+                    </tr>
                 </thead>
                 <tbody id="mainList"></tbody>
             </table>
@@ -99,28 +300,34 @@
             <div class="p-name">CHINO 99</div>
             <div class="p-contact">
                 RUT: 76781806-8<br>
-                DIRECCIÓN: Sazié 2765<br>
                 WhatsApp: +56990987447<br>
+                DIRECCIÓN: Sazié 2765<br>
                 <span id="p-dt"></span>
             </div>
         </div>
-        <div class="p-line"></div>
-        <div class="p-row" style="font-weight:bold">
-            <span class="p-col-cod">COD</span>
-            <span class="p-col-art">ARTICULO</span>
-            <span class="p-col-can">CAN</span>
-            <span class="p-col-und">UND</span>
-            <span class="p-col-val">VALOR</span>
+        <div class="p-table">
+            <div class="p-row p-head">
+                <div class="p-col c-cod">COD</div>
+                <div class="p-col c-art">ARTICULO</div>
+                <div class="p-col c-can">CANT</div>
+                <div class="p-col c-uni">UND</div>
+                <div class="p-col c-val">VALOR</div>
+            </div>
+            <div id="p-items" style="display: contents;"></div>
         </div>
-        <div class="p-line"></div>
-        <div id="p-items"></div>
-        <div class="p-total-box">TOTAL: $<span id="p-total-sum"></span></div>
+        <div class="p-total">
+            <span>TOTAL:</span>
+            <span>$<span id="p-total-sum"></span></span>
+        </div>
         <div class="p-footer">¡Gracias por su compra!</div>
     </div>
 
     <script>
         let inventory = {};
-        const formatCLP = (n) => Math.round(n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        const formatCLP = (n) => {
+            let val = Math.round(parseFloat(n) || 0);
+            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        };
 
         fetch("https://docs.google.com/spreadsheets/d/1_XquIN3Qervm2532YWbA8-3O48RUbLgTp7ywRwIGx1I/export?format=csv&v=" + Date.now())
             .then(r => r.text())
@@ -132,68 +339,104 @@
             });
 
         const icod = document.getElementById("inCod"), iart = document.getElementById("inArt"), ican = document.getElementById("inCan"), ipre = document.getElementById("inPre");
-        
+
+        ican.addEventListener('input', updatePrice);
         icod.oninput = () => {
-            let item = inventory[icod.value.trim()];
-            if (item) { iart.value = item.n; updatePrice(); }
+            let code = icod.value.trim();
+            if (code !== "" && inventory.hasOwnProperty(code)) {
+                iart.value = inventory[code].n;
+                updatePrice();
+            } else { iart.value = ""; ipre.value = ""; }
         };
 
         function updatePrice() {
-            let item = inventory[icod.value.trim()];
-            if (item && ican.value) ipre.value = Math.round(parseInt(ican.value) >= 3 ? item.p2 : item.p1);
+            let code = icod.value.trim();
+            let item = inventory[code];
+            if (item && ican.value) {
+                ipre.value = Math.round((parseInt(ican.value) >= 3) ? item.p2 : item.p1);
+            }
         }
-        ican.oninput = updatePrice;
 
         function addItem() {
-            // 恢复必填提示
-            if (!icod.value || !ican.value || !ipre.value) {
-                alert("Por favor complete Código, Cantidad y Precio.");
+            if (!icod.value.trim() || !iart.value.trim() || !ican.value || !ipre.value) {
+                alert("Completa todos los campos correctamente.");
                 return;
             }
-            let sub = Math.round(ican.value * ipre.value);
+            let subtotal = Math.round(ican.value * ipre.value);
             let tr = document.createElement("tr");
+            tr.dataset.cod = icod.value.trim();
             tr.innerHTML = `
-                <td>${icod.value}</td>
+                <td>${tr.dataset.cod}</td>
                 <td>${iart.value}</td>
-                <td><span class="editable v-can" contenteditable="true">${ican.value}</span></td>
-                <td><span class="editable v-pre" contenteditable="true">${ipre.value}</span></td>
-                <td class="row-subtotal">${formatCLP(sub)}</td>
-                <td><button class="btn-del" onclick="this.closest('tr').remove();sync()">Eliminar</button></td>
+                <td class="col-cant"><span contenteditable="true" class="editable v-can">${ican.value}</span></td>
+                <td><span contenteditable="true" class="editable v-pre">${ipre.value}</span></td>
+                <td class="row-subtotal">${formatCLP(subtotal)}</td>
+                <td><button class="btn-del" onclick="removeItem(this)">ELIMINAR</button></td>
             `;
             document.getElementById("mainList").appendChild(tr);
-            tr.querySelectorAll('.editable').forEach(el => el.oninput = sync);
-            sync(); 
-            icod.value = iart.value = ican.value = ipre.value = ""; 
-            icod.focus();
+
+            tr.querySelectorAll('.editable').forEach(cell => {
+                cell.addEventListener('input', () => {
+                    let raw = cell.innerText.replace(/\./g, '');
+                    let clean = cell.classList.contains('v-can') ? raw.replace(/\D/g, '') : raw.replace(/[^\d]/g, '');
+
+                    if (raw !== clean) {
+                        cell.innerText = clean;
+                        const range = document.createRange();
+                        const sel = window.getSelection();
+                        range.selectNodeContents(cell);
+                        range.collapse(false);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+
+                    let can = parseFloat(tr.querySelector('.v-can').innerText) || 0;
+                    let preCell = tr.querySelector('.v-pre');
+                    let item = inventory[tr.dataset.cod];
+
+                    if (item && cell.classList.contains('v-can')) {
+                        preCell.innerText = Math.round((can >= 3) ? item.p2 : item.p1);
+                    }
+
+                    let newSub = Math.round(can * (parseFloat(preCell.innerText) || 0));
+                    tr.querySelector('.row-subtotal').innerText = formatCLP(newSub);
+                    sync();
+                });
+            });
+            sync(); icod.value = iart.value = ican.value = ipre.value = ""; icod.focus();
         }
 
-        function clearList() { if(confirm("¿Limpiar todo?")) { document.getElementById("mainList").innerHTML=""; sync(); } }
+        function removeItem(btn) {
+            btn.closest('tr').remove();
+            sync();
+        }
 
         function sync() {
             let total = 0, pBox = document.getElementById("p-items");
             pBox.innerHTML = "";
             document.querySelectorAll("#mainList tr").forEach(r => {
-                let cod = r.children[0].innerText;
-                let art = r.children[1].innerText;
-                let c = r.querySelector('.v-can').innerText;
-                let p = r.querySelector('.v-pre').innerText;
-                let s = Math.round(c*p);
-                total += s;
-                // 打印行：使用 Flex 布局确保每一列对齐
+                let can = r.querySelector('.v-can').innerText;
+                let pre = r.querySelector('.v-pre').innerText;
+                let subVal = Math.round(parseFloat(can) * parseFloat(pre));
+                total += subVal;
                 pBox.innerHTML += `
                     <div class="p-row">
-                        <span class="p-col-cod">${cod}</span>
-                        <span class="p-col-art">${art}</span>
-                        <span class="p-col-can">${c}</span>
-                        <span class="p-col-und">${formatCLP(p)}</span>
-                        <span class="p-col-val">${formatCLP(s)}</span>
+                        <div class="p-col c-cod">${r.children[0].innerText}</div>
+                        <div class="p-col c-art">${r.children[1].innerText}</div>
+                        <div class="p-col c-can">${can}</div>
+                        <div class="p-col c-uni">${formatCLP(pre)}</div>
+                        <div class="p-col c-val">${formatCLP(subVal)}</div>
                     </div>`;
-                r.querySelector('.row-subtotal').innerText = formatCLP(s);
             });
             document.getElementById("totalShow").innerText = "Total: $" + formatCLP(total);
             document.getElementById("p-total-sum").innerText = formatCLP(total);
-            document.getElementById("p-dt").innerText = "FECHA: " + new Date().toLocaleString();
+
+            let n = new Date();
+            document.getElementById("p-dt").innerText = `FECHA: ${n.getFullYear()}/${n.getMonth() + 1}/${n.getDate()}, ${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}:${String(n.getSeconds()).padStart(2, '0')}`;
         }
+
+        function clearList() { if (confirm("¿Limpiar?")) { document.getElementById("mainList").innerHTML = ""; sync(); } }
     </script>
 </body>
+
 </html>
