@@ -436,14 +436,18 @@
 
     let total = document.getElementById("p-total-sum").innerText.replace(/\./g,'');
 
-    fetch("http://192.168.1.86:3000/print", {  
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ items, total })
-    });
-}
+    fetch("http://192.168.1.86:3000/print", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        items: [
+            { cod: "001", art: "可乐", can: 2, sub: 2000 }
+        ],
+        total: 2000
+    })
+});
 
         function sync() {
             let total = 0, pBox = document.getElementById("p-items");
