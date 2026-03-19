@@ -310,6 +310,7 @@
             <div class="p-contact">
                 RUT: 76781806-8<br>
                 WhatsApp: +56990987447<br>
+                DIRECCIÓN: Sazié 2765<br>
                 DIRECCIÓN: SAZIE 2765<br>
                 <span id="p-dt"></span>
             </div>
@@ -343,6 +344,7 @@
             .then(csv => {
                 csv.split("\n").slice(1).forEach(row => {
                     let cols = row.split(",");
+                    if (cols[0]) inventory[cols[0].trim()] = { n: cols[1].trim(), p1: parseFloat(cols[2]), p2: parseFloat(cols[3]) };
                     if (cols[0]) inventory[cols[0].trim().toUpperCase()] = { n: cols[1].trim(), p1: parseFloat(cols[2]), p2: parseFloat(cols[3]) };
                 });
             });
@@ -351,6 +353,7 @@
 
         ican.addEventListener('input', updatePrice);
         icod.oninput = () => {
+            let code = icod.value.trim();
             let code = icod.value.trim().toUpperCase();
             if (code !== "" && inventory.hasOwnProperty(code)) {
                 iart.value = inventory[code].n;
@@ -360,7 +363,6 @@
 
         function updatePrice() {
             let code = icod.value.trim();
-            let code = icod.value.trim().toUpperCase();
             let item = inventory[code];
             if (item && ican.value) {
                 ipre.value = Math.round((parseInt(ican.value) >= 3) ? item.p2 : item.p1);
