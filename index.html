@@ -354,7 +354,6 @@
         ican.addEventListener('input', updatePrice);
         icod.oninput = () => {
             let code = icod.value.trim().toUpperCase();
-            icod.value = code;
             if (code !== "" && inventory.hasOwnProperty(code)) {
                 iart.value = inventory[code].n;
                 updatePrice();
