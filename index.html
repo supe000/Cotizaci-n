@@ -442,22 +442,28 @@ let total = document
 .getElementById("p-total-sum")
 .innerText.replace(/\./g,'');
 
-let form = document.createElement("form");
-form.method = "POST";
-form.action = "http://192.168.1.84:3000/print";
+fetch("http://192.168.1.84:3000/print",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({
+data: JSON.stringify({
+items:items,
+total:total
+})
+})
+})
+.then(()=>{
 
-let input = document.createElement("input");
-input.type = "hidden";
-input.name = "data";
-input.value = JSON.stringify({
-items: items,
-total: total
+// 打印成功提示（可删）
+console.log("printed")
+
+})
+.catch(err=>{
+alert("打印失败");
+console.log(err);
 });
-
-form.appendChild(input);
-document.body.appendChild(form);
-
-form.submit();
 
 }
         
