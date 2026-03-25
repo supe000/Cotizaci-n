@@ -421,41 +421,41 @@
         }
 
         function printReceipt(){
-        
-        sync(); // 保持你原本小票同步
-        
-        let items = [];
-        
-        document.querySelectorAll("#mainList tr").forEach(r => {
-        
-        let cod = r.children[0].innerText;
-        let art = r.children[1].innerText;
-        let can = r.querySelector('.v-can').innerText;
-        let pre = r.querySelector('.v-pre').innerText;
-        let sub = r.querySelector('.row-subtotal').innerText.replace(/\./g,'');
-        
-        items.push({ cod, art, can, pre, sub });
-        
-        });
-        
-        let total = document
-        .getElementById("p-total-sum")
-        .innerText.replace(/\./g,'');
-        
-        fetch("http://192.168.1.84:3000/print", {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-        items: items,
-        total: total
-        })
-        })
-        .then(()=>console.log("sent"))
-        .catch(e=>alert("打印失败: "+e));
-        
-        }
+
+sync();
+
+let items = [];
+
+document.querySelectorAll("#mainList tr").forEach(r => {
+
+let cod = r.children[0].innerText;
+let art = r.children[1].innerText;
+let can = r.querySelector('.v-can').innerText;
+let pre = r.querySelector('.v-pre').innerText;
+let sub = r.querySelector('.row-subtotal').innerText.replace(/\./g,'');
+
+items.push({ cod, art, can, pre, sub });
+
+});
+
+let total = document
+.getElementById("p-total-sum")
+.innerText.replace(/\./g,'');
+
+
+let url = "http://192.168.1.84:3000/print?"
++ "data=" + encodeURIComponent(JSON.stringify({
+items:items,
+total:total
+}));
+
+let iframe = document.createElement("iframe");
+iframe.style.display="none";
+iframe.src = url;
+
+document.body.appendChild(iframe);
+
+}
         
         function sync() {
             let total = 0, pBox = document.getElementById("p-items");
