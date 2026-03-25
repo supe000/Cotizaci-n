@@ -421,7 +421,9 @@
         }
 
         function printReceipt(){
-
+        
+        sync(); // 保持你原本小票同步
+        
         let items = [];
         
         document.querySelectorAll("#mainList tr").forEach(r => {
@@ -436,18 +438,25 @@
         
         });
         
-        let total = document.getElementById("p-total-sum")
+        let total = document
+        .getElementById("p-total-sum")
         .innerText.replace(/\./g,'');
         
         fetch("http://192.168.1.84:3000/print", {
         method: "POST",
-        mode:"no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items, total })
-        });
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+        items: items,
+        total: total
+        })
+        })
+        .then(()=>console.log("sent"))
+        .catch(e=>alert("打印失败: "+e));
         
         }
-
+        
         function sync() {
             let total = 0, pBox = document.getElementById("p-items");
             pBox.innerHTML = "";
