@@ -442,18 +442,14 @@ let total = document
 .getElementById("p-total-sum")
 .innerText.replace(/\./g,'');
 
-let data = encodeURIComponent(JSON.stringify({
+let url =
+"http://192.168.1.84:3000/print?data=" +
+encodeURIComponent(JSON.stringify({
 items:items,
 total:total
 }));
 
-let iframe = document.createElement("iframe");
-
-iframe.style.display="none";
-
-iframe.src = "http://192.168.1.84:3000/print?data=" + data;
-
-document.body.appendChild(iframe);
+window.open(url);
 
 }
         
