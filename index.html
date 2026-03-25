@@ -281,7 +281,7 @@
         </div>
         <div class="btn-row">
             <button class="b-add" onclick="addItem()">Agregar</button>
-            <button class="b-print" onclick="window.print()">Imprimir</button>
+            <button class="b-print" onclick="printReceipt()">Imprimir</button>
             <button class="b-clear" onclick="clearList()">Limpiar</button>
         </div>
 
@@ -418,6 +418,13 @@
         function removeItem(btn) {
             btn.closest('tr').remove();
             sync();
+        }
+
+        function printReceipt(){
+            sync();
+            setTimeout(()=>{
+                window.print();
+            },200);
         }
 
         function sync() {
