@@ -421,38 +421,9 @@
         }
 
         function printReceipt(){
-
-sync();
-
-let items = [];
-
-document.querySelectorAll("#mainList tr").forEach(r => {
-
-let cod = r.children[0].innerText;
-let art = r.children[1].innerText;
-let can = r.querySelector('.v-can').innerText;
-let pre = r.querySelector('.v-pre').innerText;
-let sub = r.querySelector('.row-subtotal').innerText.replace(/\./g,'');
-
-items.push({ cod, art, can, pre, sub });
-
-});
-
-let total = document
-.getElementById("p-total-sum")
-.innerText.replace(/\./g,'');
-
-let url =
-"http://192.168.1.84:3000/print?data=" +
-encodeURIComponent(JSON.stringify({
-items:items,
-total:total
-}));
-
-// 直接打开（最稳定）
-window.location.href = url;
-
-}
+            alert("printer")
+            window.open("http://192.168.1.84:3000/test")
+        }
         
         function sync() {
             let total = 0, pBox = document.getElementById("p-items");
