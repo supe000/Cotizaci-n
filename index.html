@@ -442,28 +442,18 @@ let total = document
 .getElementById("p-total-sum")
 .innerText.replace(/\./g,'');
 
-fetch("http://192.168.1.84:3000/print",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body: JSON.stringify({
-data: JSON.stringify({
+let data = encodeURIComponent(JSON.stringify({
 items:items,
 total:total
-})
-})
-})
-.then(()=>{
+}));
 
-// 打印成功提示（可删）
-console.log("printed")
+let iframe = document.createElement("iframe");
 
-})
-.catch(err=>{
-alert("打印失败");
-console.log(err);
-});
+iframe.style.display="none";
+
+iframe.src = "http://192.168.1.84:3000/print?data=" + data;
+
+document.body.appendChild(iframe);
 
 }
         
