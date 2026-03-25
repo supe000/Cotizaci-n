@@ -442,18 +442,15 @@ let total = document
 .getElementById("p-total-sum")
 .innerText.replace(/\./g,'');
 
-
-let url = "http://192.168.1.84:3000/print?"
-+ "data=" + encodeURIComponent(JSON.stringify({
+let url =
+"http://192.168.1.84:3000/print?data=" +
+encodeURIComponent(JSON.stringify({
 items:items,
 total:total
 }));
 
-let iframe = document.createElement("iframe");
-iframe.style.display="none";
-iframe.src = url;
-
-document.body.appendChild(iframe);
+// 直接打开（最稳定）
+window.location.href = url;
 
 }
         
