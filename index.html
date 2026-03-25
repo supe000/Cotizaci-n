@@ -422,38 +422,44 @@
 
         function printReceipt(){
 
-            sync();
-            
-            let items = [];
-            
-            document.querySelectorAll("#mainList tr").forEach(r => {
-            
-            let cod = r.children[0].innerText;
-            let art = r.children[1].innerText;
-            let can = r.querySelector('.v-can').innerText;
-            let pre = r.querySelector('.v-pre').innerText;
-            let sub = r.querySelector('.row-subtotal').innerText.replace(/\./g,'');
-            
-            items.push({ cod, art, can, pre, sub });
-            
-            });
-            
-            let total = document
-            .getElementById("p-total-sum")
-            .innerText.replace(/\./g,'');
-            
-            let data = {
-            items: items,
-            total: total
-            };
-            
-            let url =
-            "http://192.168.1.84:3000/print?data="
-            + encodeURIComponent(JSON.stringify(data));
-            
-            window.open(url);
-            
-            }
+sync();
+
+let items = [];
+
+document.querySelectorAll("#mainList tr").forEach(r => {
+
+let cod = r.children[0].innerText;
+let art = r.children[1].innerText;
+let can = r.querySelector('.v-can').innerText;
+let pre = r.querySelector('.v-pre').innerText;
+let sub = r.querySelector('.row-subtotal').innerText.replace(/\./g,'');
+
+items.push({ cod, art, can, pre, sub });
+
+});
+
+let total = document
+.getElementById("p-total-sum")
+.innerText.replace(/\./g,'');
+
+let form = document.createElement("form");
+form.method = "POST";
+form.action = "http://192.168.1.84:3000/print";
+
+let input = document.createElement("input");
+input.type = "hidden";
+input.name = "data";
+input.value = JSON.stringify({
+items: items,
+total: total
+});
+
+form.appendChild(input);
+document.body.appendChild(form);
+
+form.submit();
+
+}
         
         function sync() {
             let total = 0, pBox = document.getElementById("p-items");
