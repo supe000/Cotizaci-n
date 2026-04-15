@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chino 99 Pro</title>
     <style>
-        /* --- 网页界面样式 --- */
         body {
             font-family: -apple-system, sans-serif;
             background: #f4f7f6;
@@ -29,6 +28,11 @@
             text-align: center;
             margin: 5px 0 15px;
             font-size: 22px;
+        }
+
+        h3 {
+            margin: 16px 0 10px;
+            color: #37474f;
         }
 
         .inputs {
@@ -82,6 +86,10 @@
             flex: 1;
         }
 
+        .b-history-clear {
+            background: #8d6e63;
+        }
+
         .table-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -109,7 +117,6 @@
             border: 1px solid #eee;
             text-align: center;
             word-break: break-all;
-            font-weight: normal;
         }
 
         .col-cant {
@@ -134,7 +141,6 @@
             color: #c62828;
         }
 
-        /* 彻底简化的删除按钮，去掉点和修饰 */
         .btn-del {
             background: #ff5252;
             color: #fff;
@@ -150,7 +156,68 @@
             -webkit-appearance: none;
         }
 
-        /* --- 打印样式控制 (80mm 适配版) --- */
+        .history-box {
+            margin-top: 18px;
+            border-top: 1px solid #eceff1;
+            padding-top: 12px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .history-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .history-meta {
+            font-size: 13px;
+            color: #455a64;
+            font-weight: bold;
+        }
+
+        .history-preview {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #607d8b;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .btn-history-load {
+            background: #26a69a;
+        }
+
+        .btn-history-del {
+            background: #ef5350;
+        }
+
+        .empty-history {
+            color: #78909c;
+            font-size: 13px;
+            padding: 10px 0;
+        }
+
         @media print {
             @page {
                 size: 80mm;
@@ -168,15 +235,16 @@
 
             #print-receipt {
                 display: block !important;
-                width: 76mm;
+                width: 72mm;
                 margin: 0 auto;
                 padding: 2mm 2mm;
                 background: #fff;
                 font-family: monospace;
                 font-variant-numeric: tabular-nums;
                 color: #000;
-                font-size:9.5pt;
-                line-height:1.2;
+                font-weight: bold;
+                font-size: 8.5pt;
+                line-height: 1.2;
             }
 
             .p-header {
@@ -187,12 +255,13 @@
 
             .p-name {
                 font-size: 18pt;
+                font-weight: bold;
                 margin-bottom: 3mm;
                 text-align: center;
             }
 
             .p-contact {
-                font-size: 8.5pt;
+                font-size: 9pt;
                 line-height: 1.2;
                 text-align: left;
             }
@@ -214,7 +283,7 @@
 
             .p-col {
                 display: table-cell;
-                letter-spacing:0.2px;
+                letter-spacing: 0.2px;
                 padding: 0.5mm 1;
                 font-size: 8pt;
             }
@@ -272,6 +341,7 @@
 <body>
     <div class="app-container">
         <h2>✨ Chino 99</h2>
+
         <div class="inputs">
             <input id="inCod" placeholder="Código">
             <input id="inArt" placeholder="Producto">
@@ -279,6 +349,7 @@
             <input id="inPre" type="number" placeholder="Unidad ($)"
                 oninput="this.value=this.value.replace(/[^\d.]/g,'')">
         </div>
+
         <div class="btn-row">
             <button class="b-add" onclick="addItem()">Agregar</button>
             <button class="b-print" onclick="printReceipt()">Imprimir</button>
@@ -300,7 +371,16 @@
                 <tbody id="mainList"></tbody>
             </table>
         </div>
+
         <div class="total-banner" id="totalShow">Total: $0</div>
+
+        <div class="history-box">
+            <div class="btn-row" style="justify-content:space-between;">
+                <h3 style="margin:0;">Historial</h3>
+                <button class="b-history-clear" onclick="clearAllHistory()">Borrar historial</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+        </div>
     </div>
 
     <div id="print-receipt">
@@ -332,6 +412,8 @@
 
     <script>
         let inventory = {};
+        const STORAGE_KEY = "chino99_history_v1";
+
         const formatCLP = (n) => {
             let val = Math.round(parseFloat(n) || 0);
             return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -342,20 +424,32 @@
             .then(csv => {
                 csv.split("\n").slice(1).forEach(row => {
                     let cols = row.split(",");
-                    if (cols[0]) inventory[cols[0].trim()] = { n: cols[1].trim(), p1: parseFloat(cols[2]), p2: parseFloat(cols[3]) };
-                    if (cols[0]) inventory[cols[0].trim().toUpperCase()] = { n: cols[1].trim(), p1: parseFloat(cols[2]), p2: parseFloat(cols[3]) };
+                    if (cols[0]) {
+                        inventory[cols[0].trim().toUpperCase()] = {
+                            n: (cols[1] || "").trim(),
+                            p1: parseFloat(cols[2]) || 0,
+                            p2: parseFloat(cols[3]) || 0
+                        };
+                    }
                 });
             });
 
-        const icod = document.getElementById("inCod"), iart = document.getElementById("inArt"), ican = document.getElementById("inCan"), ipre = document.getElementById("inPre");
+        const icod = document.getElementById("inCod");
+        const iart = document.getElementById("inArt");
+        const ican = document.getElementById("inCan");
+        const ipre = document.getElementById("inPre");
 
-        ican.addEventListener('input', updatePrice);
+        ican.addEventListener("input", updatePrice);
+
         icod.oninput = () => {
             let code = icod.value.trim().toUpperCase();
             if (code !== "" && inventory.hasOwnProperty(code)) {
                 iart.value = inventory[code].n;
                 updatePrice();
-            } else { iart.value = ""; ipre.value = ""; }
+            } else {
+                iart.value = "";
+                ipre.value = "";
+            }
         };
 
         function updatePrice() {
@@ -371,23 +465,81 @@
                 alert("Completa todos los campos correctamente.");
                 return;
             }
-            let subtotal = Math.round(ican.value * ipre.value);
-            let tr = document.createElement("tr");
-            tr.dataset.cod = icod.value.trim();
-            tr.innerHTML = `
-                <td>${tr.dataset.cod}</td>
-                <td>${iart.value}</td>
-                <td class="col-cant"><span contenteditable="true" class="editable v-can">${ican.value}</span></td>
-                <td><span contenteditable="true" class="editable v-pre">${ipre.value}</span></td>
-                <td class="row-subtotal">${formatCLP(subtotal)}</td>
-                <td><button class="btn-del" onclick="removeItem(this)">ELIMINAR</button></td>
-            `;
-            document.getElementById("mainList").appendChild(tr);
 
-            tr.querySelectorAll('.editable').forEach(cell => {
-                cell.addEventListener('input', () => {
-                    let raw = cell.innerText.replace(/\./g, '');
-                    let clean = cell.classList.contains('v-can') ? raw.replace(/\D/g, '') : raw.replace(/[^\d]/g, '');
+            const cod = icod.value.trim();
+            const art = iart.value.trim();
+            const can = parseFloat(ican.value) || 0;
+            const pre = parseFloat(ipre.value) || 0;
+
+            // 先找有没有相同 Código
+            const existingRow = Array.from(document.querySelectorAll("#mainList tr"))
+                .find(tr => tr.dataset.cod === cod);
+
+            if (existingRow) {
+                const canCell = existingRow.querySelector(".v-can");
+                const preCell = existingRow.querySelector(".v-pre");
+
+                let oldCan = parseFloat(canCell.innerText) || 0;
+                let newCan = oldCan + can;
+
+                // 数量更新
+                canCell.innerText = newCan;
+
+                // 如果库存里有这个商品，就按你的批发规则重算单价
+                let item = inventory[cod.toUpperCase()];
+                if (item) {
+                    preCell.innerText = Math.round((newCan >= 3) ? item.p2 : item.p1);
+                } else {
+                    preCell.innerText = pre;
+                }
+
+                // 重算小计
+                let finalPre = parseFloat(preCell.innerText) || 0;
+                let newSub = Math.round(newCan * finalPre);
+                existingRow.querySelector(".row-subtotal").innerText = formatCLP(newSub);
+
+                sync();
+
+                icod.value = "";
+                iart.value = "";
+                ican.value = "";
+                ipre.value = "";
+                icod.focus();
+                return;
+            }
+
+            let subtotal = Math.round(can * pre);
+            let tr = document.createElement("tr");
+            tr.dataset.cod = cod;
+
+            tr.innerHTML = `
+        <td>${cod}</td>
+        <td>${art}</td>
+        <td class="col-cant"><span contenteditable="true" class="editable v-can">${can}</span></td>
+        <td><span contenteditable="true" class="editable v-pre">${pre}</span></td>
+        <td class="row-subtotal">${formatCLP(subtotal)}</td>
+        <td><button class="btn-del" onclick="removeItem(this)">ELIMINAR</button></td>
+    `;
+
+            document.getElementById("mainList").appendChild(tr);
+            bindEditableRow(tr);
+
+            sync();
+
+            icod.value = "";
+            iart.value = "";
+            ican.value = "";
+            ipre.value = "";
+            icod.focus();
+        }
+
+        function bindEditableRow(tr) {
+            tr.querySelectorAll(".editable").forEach(cell => {
+                cell.addEventListener("input", () => {
+                    let raw = cell.innerText.replace(/\./g, "");
+                    let clean = cell.classList.contains("v-can")
+                        ? raw.replace(/\D/g, "")
+                        : raw.replace(/[^\d]/g, "");
 
                     if (raw !== clean) {
                         cell.innerText = clean;
@@ -399,71 +551,178 @@
                         sel.addRange(range);
                     }
 
-                    let can = parseFloat(tr.querySelector('.v-can').innerText) || 0;
-                    let preCell = tr.querySelector('.v-pre');
+                    let can = parseFloat(tr.querySelector(".v-can").innerText) || 0;
+                    let preCell = tr.querySelector(".v-pre");
                     let item = inventory[tr.dataset.cod];
 
-                    if (item && cell.classList.contains('v-can')) {
+                    if (item && cell.classList.contains("v-can")) {
                         preCell.innerText = Math.round((can >= 3) ? item.p2 : item.p1);
                     }
 
                     let newSub = Math.round(can * (parseFloat(preCell.innerText) || 0));
-                    tr.querySelector('.row-subtotal').innerText = formatCLP(newSub);
+                    tr.querySelector(".row-subtotal").innerText = formatCLP(newSub);
                     sync();
                 });
             });
-            sync(); icod.value = iart.value = ican.value = ipre.value = ""; icod.focus();
         }
 
         function removeItem(btn) {
-            btn.closest('tr').remove();
+            btn.closest("tr").remove();
             sync();
         }
 
-        function printReceipt() {
-          sync();
-        
-          const ua = navigator.userAgent;
-        
-          if (/Windows/i.test(ua)) {
-            // 电脑
-            setTimeout(() => {
-              window.print();
-            }, 200);
-          } else {
-            // 手机
+        function getCurrentItems() {
             let items = [];
-        
+
             document.querySelectorAll("#mainList tr").forEach(r => {
-              let cod = r.children[0].innerText;
-              let art = r.children[1].innerText;
-              let can = r.querySelector(".v-can").innerText;
-              let pre = r.querySelector(".v-pre").innerText;
-              let sub = r.querySelector(".row-subtotal").innerText.replace(/\./g, "");
-        
-              items.push({ cod, art, can, pre, sub });
+                let cod = r.children[0].innerText;
+                let art = r.children[1].innerText;
+                let can = r.querySelector(".v-can").innerText;
+                let pre = r.querySelector(".v-pre").innerText;
+                let sub = r.querySelector(".row-subtotal").innerText.replace(/\./g, "");
+
+                items.push({ cod, art, can, pre, sub });
             });
-        
-            let total = document
-              .getElementById("p-total-sum")
-              .innerText.replace(/\./g, "");
-        
-            let url =
-              "http://192.168.1.200:3000/print?data=" +
-              encodeURIComponent(JSON.stringify({ items, total }));
-        
-            window.open(url);
-          }
+
+            return items;
         }
-        
+
+        function getCurrentTotalRaw() {
+            return document.getElementById("p-total-sum").innerText.replace(/\./g, "");
+        }
+
+        function buildHistoryEntry() {
+            const items = getCurrentItems();
+            const total = getCurrentTotalRaw();
+
+            if (!items.length) return null;
+
+            return {
+                id: Date.now(),
+                createdAt: new Date().toISOString(),
+                items,
+                total
+            };
+        }
+
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            } catch {
+                return [];
+            }
+        }
+
+        function saveHistory(list) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        }
+
+        function addCurrentToHistory() {
+            const entry = buildHistoryEntry();
+            if (!entry) return;
+
+            let history = getHistory();
+
+            const serialized = JSON.stringify({
+                items: entry.items,
+                total: entry.total
+            });
+
+            history = history.filter(h => JSON.stringify({
+                items: h.items,
+                total: h.total
+            }) !== serialized);
+
+            history.unshift(entry);
+            history = history.slice(0, 100);
+
+            saveHistory(history);
+            renderHistory();
+        }
+
+        function loadHistoryEntry(id) {
+            const history = getHistory();
+            const entry = history.find(h => String(h.id) === String(id));
+            if (!entry) return;
+
+            document.getElementById("mainList").innerHTML = "";
+
+            entry.items.forEach(item => {
+                let tr = document.createElement("tr");
+                tr.dataset.cod = item.cod;
+
+                tr.innerHTML = `
+                    <td>${item.cod}</td>
+                    <td>${item.art}</td>
+                    <td class="col-cant"><span contenteditable="true" class="editable v-can">${item.can}</span></td>
+                    <td><span contenteditable="true" class="editable v-pre">${item.pre}</span></td>
+                    <td class="row-subtotal">${formatCLP(item.sub)}</td>
+                    <td><button class="btn-del" onclick="removeItem(this)">ELIMINAR</button></td>
+                `;
+
+                document.getElementById("mainList").appendChild(tr);
+                bindEditableRow(tr);
+            });
+
+            sync();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function deleteHistoryEntry(id) {
+            if (!confirm("¿Eliminar este registro?")) return;
+
+            let history = getHistory().filter(h => String(h.id) !== String(id));
+            saveHistory(history);
+            renderHistory();
+        }
+
+        function clearAllHistory() {
+            if (!confirm("¿Borrar todo el historial?")) return;
+            localStorage.removeItem(STORAGE_KEY);
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const box = document.getElementById("historyList");
+            const history = getHistory();
+
+            if (!history.length) {
+                box.innerHTML = `<div class="empty-history">No hay historial guardado.</div>`;
+                return;
+            }
+
+            box.innerHTML = history.map(h => {
+                const d = new Date(h.createdAt);
+                const fecha = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+                const preview = h.items.slice(0, 3).map(i => `${i.cod} - ${i.art}`).join(" | ");
+
+                return `
+                    <div class="history-item">
+                        <div class="history-top">
+                            <div class="history-meta">${fecha} · ${h.items.length} ítem(s) · Total: $${formatCLP(h.total)}</div>
+                        </div>
+                        <div class="history-preview">${preview || ""}</div>
+                        <div class="history-actions">
+                            <button class="btn-history-load" onclick="loadHistoryEntry('${h.id}')">Cargar</button>
+                            <button class="btn-history-del" onclick="deleteHistoryEntry('${h.id}')">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
         function sync() {
-            let total = 0, pBox = document.getElementById("p-items");
+            let total = 0;
+            let pBox = document.getElementById("p-items");
             pBox.innerHTML = "";
+
             document.querySelectorAll("#mainList tr").forEach(r => {
-                let can = r.querySelector('.v-can').innerText;
-                let pre = r.querySelector('.v-pre').innerText;
-                let subVal = Math.round(parseFloat(can) * parseFloat(pre));
+                let can = r.querySelector(".v-can").innerText;
+                let pre = r.querySelector(".v-pre").innerText;
+                let subVal = Math.round((parseFloat(can) || 0) * (parseFloat(pre) || 0));
+
                 total += subVal;
+
                 pBox.innerHTML += `
                     <div class="p-row">
                         <div class="p-col c-cod">${r.children[0].innerText}</div>
@@ -471,16 +730,53 @@
                         <div class="p-col c-can">${can}</div>
                         <div class="p-col c-uni">${formatCLP(pre)}</div>
                         <div class="p-col c-val">${formatCLP(subVal)}</div>
-                    </div>`;
+                    </div>
+                `;
             });
+
             document.getElementById("totalShow").innerText = "Total: $" + formatCLP(total);
             document.getElementById("p-total-sum").innerText = formatCLP(total);
 
             let n = new Date();
-            document.getElementById("p-dt").innerText = `FECHA: ${n.getFullYear()}/${n.getMonth() + 1}/${n.getDate()}, ${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}:${String(n.getSeconds()).padStart(2, '0')}`;
+            document.getElementById("p-dt").innerText =
+                `FECHA: ${n.getFullYear()}/${n.getMonth() + 1}/${n.getDate()}, ${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}:${String(n.getSeconds()).padStart(2, '0')}`;
         }
 
-        function clearList() { if (confirm("¿Limpiar?")) { document.getElementById("mainList").innerHTML = ""; sync(); } }
+        function printReceipt() {
+            sync();
+
+            const ua = navigator.userAgent || "";
+            const isWindows = /Windows/i.test(ua);
+
+            if (isWindows) {
+                addCurrentToHistory();
+                setTimeout(() => {
+                    window.print();
+                }, 200);
+                return;
+            }
+
+            let items = getCurrentItems();
+            let total = getCurrentTotalRaw();
+
+            addCurrentToHistory();
+
+            let url =
+                "http://192.168.1.200:3000/print?data=" +
+                encodeURIComponent(JSON.stringify({ items, total }));
+
+            window.open(url);
+        }
+
+        function clearList() {
+            if (confirm("¿Limpiar?")) {
+                document.getElementById("mainList").innerHTML = "";
+                sync();
+            }
+        }
+
+        renderHistory();
+        sync();
     </script>
 </body>
 
