@@ -743,13 +743,7 @@
         }
 
         function printReceipt() {
-            const items = getCurrentItems();
-        
-            // 🚫 空单不允许打印
-            if (!items.length) {
-                alert("No hay productos para imprimir");
-                return;
-            }
+           
         
             sync();
         
@@ -763,7 +757,7 @@
                 }, 200);
                 return;
             }
-        
+            let items = getCurrentItems();
             let total = getCurrentTotalRaw();
         
             addCurrentToHistory();
