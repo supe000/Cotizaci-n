@@ -352,7 +352,7 @@
 
         <div class="btn-row">
             <button class="b-add" onclick="addItem()">Agregar</button>
-            <button class="b-print" onclick="printReceipt()">Imprimir</button>
+            <button class="b-print" onclick="()">Imprimir</button>
             <button class="b-clear" onclick="clearList()">Limpiar</button>
         </div>
 
@@ -743,28 +743,35 @@
         }
 
         function printReceipt() {
+            const items = getCurrentItems();
+        
+            // 🚫 空单不允许打印
+            if (!items.length) {
+                alert("No hay productos para imprimir");
+                return;
+            }
+        
             sync();
-
+        
             const ua = navigator.userAgent || "";
             const isWindows = /Windows/i.test(ua);
-
+        
             if (isWindows) {
-                addCurrentToHistory();
+                addCurrentToHistory(); // 保存历史
                 setTimeout(() => {
                     window.print();
                 }, 200);
                 return;
             }
-
-            let items = getCurrentItems();
+        
             let total = getCurrentTotalRaw();
-
+        
             addCurrentToHistory();
-
+        
             let url =
                 "http://192.168.1.200:3000/print?data=" +
                 encodeURIComponent(JSON.stringify({ items, total }));
-
+        
             window.open(url);
         }
 
