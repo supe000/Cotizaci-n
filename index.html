@@ -645,14 +645,14 @@
             const history = getHistory();
 
             if (!history.length) {
-                box.innerHTML = <div class="empty-history">No hay historial guardado.</div>;
+                box.innerHTML = `<div class="empty-history">No hay historial guardado.</div>`;
                 return;
             }
 
             box.innerHTML = history.map(h => {
                 const d = new Date(h.createdAt);
-                const fecha = ${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")};
-                const preview = h.items.slice(0, 3).map(i => ${i.cod} - ${i.art}).join(" | ");
+                const fecha = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+                const preview = h.items.slice(0, 3).map(i => `${i.cod} - ${i.art}`).join(" | ");
 
                 return `
                     <div class="history-item">
@@ -697,7 +697,7 @@
 
             let n = new Date();
             document.getElementById("p-dt").innerText =
-                FECHA: ${n.getFullYear()}/${n.getMonth() + 1}/${n.getDate()}, ${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}:${String(n.getSeconds()).padStart(2, '0')};
+                `FECHA: ${n.getFullYear()}/${n.getMonth() + 1}/${n.getDate()}, ${String(n.getHours()).padStart(2, '0')}:${String(n.getMinutes()).padStart(2, '0')}:${String(n.getSeconds()).padStart(2, '0')}`;
         }
 
         function printReceipt() {
