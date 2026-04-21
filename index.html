@@ -465,41 +465,42 @@
                 alert("Completa todos los campos correctamente.");
                 return;
             }
-        
-            const cod = icod.value.trim();
+
+            const cod = icod.value.trim().toUpperCase();
             const art = iart.value.trim();
             const can = parseFloat(ican.value) || 0;
             const pre = parseFloat(ipre.value) || 0;
-        
-            // 先找有没有相同 Código
+
+            // 找相同 Código（统一大写后比较）
             const existingRow = Array.from(document.querySelectorAll("#mainList tr"))
-                .find(tr => tr.dataset.cod === cod);
-        
+                .find(tr => (tr.dataset.cod || "").toUpperCase() === cod);
+
             if (existingRow) {
                 const canCell = existingRow.querySelector(".v-can");
                 const preCell = existingRow.querySelector(".v-pre");
-        
+
                 let oldCan = parseFloat(canCell.innerText) || 0;
                 let newCan = oldCan + can;
-        
-                // 数量更新
+
+                // 更新数量
                 canCell.innerText = newCan;
-        
-                // 如果库存里有这个商品，就按你的批发规则重算单价
-                let item = inventory[cod.toUpperCase()];
+
+                // 重新按总数量计算价格
+                let item = inventory[cod];
+                let newPre = pre;
+
                 if (item) {
-                    preCell.innerText = Math.round((newCan >= 3) ? item.p2 : item.p1);
-                } else {
-                    preCell.innerText = pre;
+                    newPre = Math.round((newCan >= 3) ? item.p2 : item.p1);
                 }
-        
+
+                preCell.innerText = newPre;
+
                 // 重算小计
-                let finalPre = parseFloat(preCell.innerText) || 0;
-                let newSub = Math.round(newCan * finalPre);
+                let newSub = Math.round(newCan * newPre);
                 existingRow.querySelector(".row-subtotal").innerText = formatCLP(newSub);
-        
+
                 sync();
-        
+
                 icod.value = "";
                 iart.value = "";
                 ican.value = "";
@@ -507,25 +508,25 @@
                 icod.focus();
                 return;
             }
-        
+
             let subtotal = Math.round(can * pre);
             let tr = document.createElement("tr");
             tr.dataset.cod = cod;
-        
+
             tr.innerHTML = `
-                <td>${cod}</td>
-                <td>${art}</td>
-                <td class="col-cant"><span contenteditable="true" class="editable v-can">${can}</span></td>
-                <td><span contenteditable="true" class="editable v-pre">${pre}</span></td>
-                <td class="row-subtotal">${formatCLP(subtotal)}</td>
-                <td><button class="btn-del" onclick="removeItem(this)">ELIMINAR</button></td>
-            `;
-        
+        <td>${cod}</td>
+        <td>${art}</td>
+        <td class="col-cant"><span contenteditable="true" class="editable v-can">${can}</span></td>
+        <td><span contenteditable="true" class="editable v-pre">${pre}</span></td>
+        <td class="row-subtotal">${formatCLP(subtotal)}</td>
+        <td><button class="btn-del" onclick="removeItem(this)">ELIMINAR</button></td>
+    `;
+
             document.getElementById("mainList").appendChild(tr);
             bindEditableRow(tr);
-        
+
             sync();
-        
+
             icod.value = "";
             iart.value = "";
             ican.value = "";
