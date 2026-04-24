@@ -343,8 +343,7 @@
         <h2>✨ Chino 99</h2>
 
         <div class="inputs">
-            <input id="inCod" placeholder="Código" list="codList">
-            <datalist id="codList"></datalist>
+            <input id="inCod" placeholder="Código">
             <input id="inArt" placeholder="Producto">
             <input id="inCan" type="number" placeholder="Cantidad" oninput="this.value=this.value.replace(/\D/g,'')">
             <input id="inPre" type="number" placeholder="Unidad ($)"
@@ -442,46 +441,14 @@
 
         ican.addEventListener("input", updatePrice);
 
-        function updateCodSuggestions(value) {
-            const list = document.getElementById("codList");
-            const v = (value || "").toUpperCase();
-
-            const matches = Object.keys(inventory)
-                .filter(code => {
-                    const item = inventory[code];
-                    return (
-                        code.includes(v) ||                          // 匹配编码
-                        (item.n || "").toUpperCase().includes(v)     // 匹配商品名
-                    );
-                })
-                .slice(0, 10);
-
-            list.innerHTML = matches.map(code => {
-                const item = inventory[code];
-                return `<option value="${code}">${code} - ${item.n}</option>`;
-            }).join("");
-        }
-
         icod.oninput = () => {
             let code = icod.value.trim().toUpperCase();
-
-            updateCodSuggestions(code);  // ⭐ 搜索
-
             if (code !== "" && inventory.hasOwnProperty(code)) {
                 iart.value = inventory[code].n;
                 updatePrice();
             } else {
                 iart.value = "";
                 ipre.value = "";
-            }
-        };
-
-        icod.onchange = () => {
-            let code = icod.value.trim().toUpperCase();
-
-            if (inventory.hasOwnProperty(code)) {
-                iart.value = inventory[code].n;
-                updatePrice();
             }
         };
 
